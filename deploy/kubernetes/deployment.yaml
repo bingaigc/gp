@@ -1,0 +1,201 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alpha-detector
+  namespace: trading
+  labels:
+    app: alpha-detector
+    version: v2.0
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: alpha-detector
+  template:
+    metadata:
+      labels:
+        app: alpha-detector
+        version: v2.0
+    spec:
+      containers:
+      - name: alpha-detector
+        image: alpha-detector:2.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 9090
+          name: metrics
+          protocol: TCP
+        env:
+        - name: ALPHA_KIMI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: alpha-secrets
+              key: kimi-api-key
+        - name: CONFIG_PATH
+          value: "/app/config/config.yaml"
+        - name: LOG_LEVEL
+          value: "info"
+        - name: KAFKA_BROKERS
+          value: "kafka-broker:9092"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "2000m"
+            memory: "2Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        - name: data
+          mountPath: /app/data
+      volumes:
+      - name: config
+        configMap:
+          name: alpha-config
+      - name: data
+        persistentVolumeClaim:
+          claimName: alpha-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alpha-detector-service
+  namespace: trading
+  labels:
+    app: alpha-detector
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  - port: 9090
+    targetPort: 9090
+    protocol: TCP
+    name: metrics
+  selector:
+    app: alpha-detector
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alpha-config
+  namespace: trading
+data:
+  config.yaml: |
+    system:
+      name: "CAMP-I Alpha Detector"
+      version: "2.0.0"
+      environment: "production"
+      log_level: "info"
+    
+    data_source:
+      primary: "eastmoney"
+      timeout: 10s
+      max_retry: 3
+    
+    ai:
+      provider: "kimi"
+      model: "moonshot-v1-8k"
+      base_url: "https://api.moonshot.cn/v1"
+      timeout: 30s
+    
+    pipeline:
+      workers: 3
+      batch_size: 20
+      limit: 100
+    
+    risk:
+      daily_max_loss: 50000.0
+      max_signals_per_day: 20
+      min_confidence: 0.6
+      var_limit: 0.03
+      cvar_limit: 0.05
+    
+    messaging:
+      enabled: true
+      kafka:
+        brokers: ["kafka-broker:9092"]
+        topic: "alpha.signals"
+    
+    monitoring:
+      enabled: true
+      prometheus_port: 9090
+      metrics_interval: 60
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alpha-secrets
+  namespace: trading
+type: Opaque
+stringData:
+  kimi-api-key: "REPLACE_WITH_YOUR_API_KEY"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: alpha-data-pvc
+  namespace: trading
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: alpha-detector-hpa
+  namespace: trading
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: alpha-detector
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Pods
+    pods:
+      metric:
+        name: alpha_signals_generated_total
+      target:
+        type: AverageValue
+        averageValue: "100"
