@@ -31,3 +31,26 @@ pipeline:
 observability:
   enable_tracing: true
   enable_metrics: true
+
+sinks:
+  console:
+    enabled: true
+    pretty: true
+  json_file:
+    enabled: false
+    output_dir: "output/signals"
+    pretty: true
+  webhook:
+    enabled: false
+    url: ""
+    secret: ""
+    format: "generic"  # "dingtalk", "feishu", "generic"
+
+filters:
+  enable_basic: true
+  enable_liquidity: true
+  min_volume: 100000      # 最小成交量 10万手
+  min_amount: 10000000.0  # 最小成交额 1000万元
+  whitelist: []           # 白名单股票代码
+  blacklist: []           # 黑名单股票代码
+

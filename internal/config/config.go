@@ -10,12 +10,14 @@ import (
 
 // Config 配置结构
 type Config struct {
-	System       SystemConfig       `yaml:"system"`
-	DataSource   DataSourceConfig   `yaml:"data_source"`
-	AI           AIConfig           `yaml:"ai"`
-	Risk         RiskConfig         `yaml:"risk"`
-	Pipeline     PipelineConfig     `yaml:"pipeline"`
+	System        SystemConfig        `yaml:"system"`
+	DataSource    DataSourceConfig    `yaml:"data_source"`
+	AI            AIConfig            `yaml:"ai"`
+	Risk          RiskConfig          `yaml:"risk"`
+	Pipeline      PipelineConfig      `yaml:"pipeline"`
 	Observability ObservabilityConfig `yaml:"observability"`
+	Sinks         SinksConfig         `yaml:"sinks"`
+	Filters       FiltersConfig       `yaml:"filters"`
 }
 
 // SystemConfig 系统配置
@@ -64,6 +66,44 @@ type ObservabilityConfig struct {
 	EnableMetrics bool `yaml:"enable_metrics"`
 }
 
+// SinksConfig 信号输出配置
+type SinksConfig struct {
+	Console  ConsoleSinkConfig  `yaml:"console"`
+	JSONFile JSONFileSinkConfig `yaml:"json_file"`
+	Webhook  WebhookSinkConfig  `yaml:"webhook"`
+}
+
+// ConsoleSinkConfig 控制台输出配置
+type ConsoleSinkConfig struct {
+	Enabled bool `yaml:"enabled"`
+	Pretty  bool `yaml:"pretty"`
+}
+
+// JSONFileSinkConfig JSON文件输出配置
+type JSONFileSinkConfig struct {
+	Enabled   bool   `yaml:"enabled"`
+	OutputDir string `yaml:"output_dir"`
+	Pretty    bool   `yaml:"pretty"`
+}
+
+// WebhookSinkConfig Webhook输出配置
+type WebhookSinkConfig struct {
+	Enabled bool   `yaml:"enabled"`
+	URL     string `yaml:"url"`
+	Secret  string `yaml:"secret"`
+	Format  string `yaml:"format"` // "dingtalk", "feishu", "generic"
+}
+
+// FiltersConfig 过滤器配置
+type FiltersConfig struct {
+	EnableBasic     bool     `yaml:"enable_basic"`
+	EnableLiquidity bool     `yaml:"enable_liquidity"`
+	MinVolume       int64    `yaml:"min_volume"`
+	MinAmount       float64  `yaml:"min_amount"`
+	Whitelist       []string `yaml:"whitelist"`
+	Blacklist       []string `yaml:"blacklist"`
+}
+
 // Load 加载配置
 func Load(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
@@ -86,8 +126,17 @@ func Load(path string) (*Config, error) {
 
 // Validate 验证配置
 func (c *Config) Validate() error {
+	// AI key is optional for demo mode
+	if c.Pipeline.Workers <= 0 {
+		return fmt.Errorf("pipeline workers must be > 0")
+	}
+	return nil
+}
+
+// ValidateForRealMode 验证实时模式配置
+func (c *Config) ValidateForRealMode() error {
 	if c.AI.APIKey == "" {
-		return fmt.Errorf("AI API key is required")
+		return fmt.Errorf("AI API key is required for real-time mode")
 	}
 	if c.Pipeline.Workers <= 0 {
 		return fmt.Errorf("pipeline workers must be > 0")

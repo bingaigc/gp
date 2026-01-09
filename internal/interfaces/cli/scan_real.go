@@ -45,7 +45,7 @@ func runScanReal(cmd *cobra.Command, args []string) {
 		log.Fatalf("加载配置失败: %v", err)
 	}
 
-	if err := cfg.Validate(); err != nil {
+	if err := cfg.ValidateForRealMode(); err != nil {
 		log.Fatalf("配置验证失败: %v", err)
 	}
 
