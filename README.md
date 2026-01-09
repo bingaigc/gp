@@ -14,6 +14,8 @@ CAMP-I (Capital + Action + Margin + Plate + Institution) 是一个企业级分�
 - 🛡️ **多层风控体系**: 6级风控保护，最大回撤控制<20%
 - ⚡ **高性能并发**: 支持>5000股/日处理能力，信号延迟<500ms
 - 💰 **成本可控**: AI单次成本<¥0.3，日运营成本<¥100
+- 📡 **实时数据**: 集成东方财富API实时获取市场数据
+- 🔄 **Pipeline编排**: 多Worker并发处理，Fan-out/Fan-in模式
 
 ### 性能指标
 
@@ -134,16 +136,30 @@ export ALPHA_KIMI_API_KEY="your-kimi-api-key"
 
 ### 运行
 
+#### 演示模式（使用示例数据）
+
 ```bash
-# 方式1: 使用 make
+# 使用 make
 make run
 
-# 方式2: 直接运行二进制
+# 或直接运行
 ./bin/alpha-detector scan
-
-# 方式3: 使用 go run
-go run ./cmd/alpha scan
 ```
+
+#### 实时模式（使用真实数据 + AI分析）
+
+```bash
+# 需要设置Kimi API Key
+export ALPHA_KIMI_API_KEY="your-api-key"
+
+# 运行实时扫描
+./bin/alpha-detector scan-real
+
+# 查看帮助
+./bin/alpha-detector scan-real --help
+```
+
+**注意**: 实时模式会连接东方财富API获取实时市场数据，并调用Kimi AI进行分析，会产生API费用。
 
 ## 📊 CAMP-I 五维度模型
 
