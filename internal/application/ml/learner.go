@@ -30,42 +30,42 @@ func NewLearningEngine(modelStorage *storage.ModelStorage, histStorage *storage.
 // Learn performs one learning cycle
 func (le *LearningEngine) Learn(ctx context.Context, stockCode string, indicatorType string) error {
 	log.Printf("🎓 开始学习: %s - %s", stockCode, indicatorType)
-	
+
 	// Get predicted indicators
 	predicted, err := le.predictor.Predict(ctx, stockCode, indicatorType)
 	if err != nil {
 		return err
 	}
-	
+
 	// Wait a bit and get actual value (in production, get real-time data)
 	// For demo, simulate actual value
 	actualValue := le.simulateActualValue(predicted.PredictedValue)
 	predicted.UpdateActual(actualValue)
-	
+
 	// Calculate errors
 	mae := predicted.AbsoluteError
 	rmse := math.Sqrt(predicted.SquaredError)
 	mape := predicted.PercentageError
-	
+
 	log.Printf("📊 误差统计:")
 	log.Printf("   MAE: %.4f", mae)
 	log.Printf("   RMSE: %.4f", rmse)
 	log.Printf("   MAPE: %.2f%%", mape)
-	
+
 	// Update model metrics
 	model, _ := le.modelStorage.GetActive(indicatorType)
 	if model != nil {
 		oldMAPE := model.MAPE
 		newMAPE := le.updateMovingAverage(oldMAPE, mape, 0.1) // 10% learning rate
-		model.UpdateMetrics(mae, rmse, newMAPE, 0.9) // R2 placeholder
+		model.UpdateMetrics(mae, rmse, newMAPE, 0.9)          // R2 placeholder
 		le.modelStorage.Update(model)
-		
+
 		improvement := oldMAPE - newMAPE
 		if improvement > 0 {
 			log.Printf("✅ 模型改进: MAPE %.2f%% → %.2f%% (提升%.2f%%)", oldMAPE, newMAPE, improvement)
 		}
 	}
-	
+
 	// Check if retraining needed
 	if le.needsRetraining(model) {
 		log.Printf("🔄 开始重新训练模型...")
@@ -75,7 +75,7 @@ func (le *LearningEngine) Learn(ctx context.Context, stockCode string, indicator
 			log.Printf("✅ 重训练完成")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -89,13 +89,13 @@ func (le *LearningEngine) needsRetraining(model *entity.PredictionModel) bool {
 	if model == nil {
 		return false
 	}
-	
+
 	// Retrain if:
 	// 1. MAPE too high (>10%)
 	// 2. Model too old (>7 days)
 	maxMAPE := 10.0
 	maxAge := 7 * 24 * time.Hour
-	
+
 	return model.MAPE > maxMAPE || model.GetAge() > maxAge
 }
 
@@ -107,22 +107,22 @@ func (le *LearningEngine) retrain(ctx context.Context, model *entity.PredictionM
 	if err != nil {
 		return err
 	}
-	
+
 	if len(data) < 30 {
 		return fmt.Errorf("insufficient data for retraining: %d", len(data))
 	}
-	
+
 	// Simple retraining: recalculate model parameters
 	// In production, use proper ML framework
 	model.TrainedAt = time.Now()
 	model.TrainingSamples = len(data) * 70 / 100
 	model.ValidationSamples = len(data) * 30 / 100
 	model.Version = fmt.Sprintf("v%s", time.Now().Format("20060102"))
-	
+
 	// Reset metrics for fresh start
 	model.MAPE = model.MAPE * 0.8 // Simulate improvement
 	model.UpdatedAt = time.Now()
-	
+
 	return le.modelStorage.Update(model)
 }
 
@@ -137,9 +137,9 @@ func (le *LearningEngine) simulateActualValue(predicted float64) float64 {
 func (le *LearningEngine) ContinuousLearning(ctx context.Context, stockCode string, interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
-	
+
 	indicatorTypes := []string{"MA5", "MA10", "MA20", "RSI", "MACD"}
-	
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -174,23 +174,23 @@ func (le *LearningEngine) AnalyzeConvergence(stockCode, indicatorType string) (*
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Calculate convergence metrics
 	initialMAPE := 20.0 // Assume initial error
 	currentMAPE := model.MAPE
 	improvement := initialMAPE - currentMAPE
 	convergenceRate := improvement / float64(model.PredictionCount+1) * 100
-	
+
 	// Check if converged (MAPE < 5%)
 	targetMAPE := 5.0
 	isConverged := currentMAPE < targetMAPE
-	
+
 	// Estimate iterations to target
 	iterationsToTarget := 0
 	if !isConverged && convergenceRate > 0 {
 		iterationsToTarget = int((currentMAPE - targetMAPE) / (convergenceRate / 100))
 	}
-	
+
 	return &ConvergenceAnalysis{
 		IndicatorType:      indicatorType,
 		InitialMAPE:        initialMAPE,

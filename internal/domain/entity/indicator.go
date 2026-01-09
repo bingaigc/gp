@@ -7,27 +7,27 @@ import (
 
 // TechnicalIndicator represents a technical indicator with predicted and actual values
 type TechnicalIndicator struct {
-	StockCode    string    `json:"stock_code"`
-	IndicatorType string   `json:"indicator_type"` // MA5, MA10, MA20, MACD, RSI, KDJ, etc.
-	
+	StockCode     string `json:"stock_code"`
+	IndicatorType string `json:"indicator_type"` // MA5, MA10, MA20, MACD, RSI, KDJ, etc.
+
 	// Predicted values
 	PredictedValue float64   `json:"predicted_value"`
 	PredictedAt    time.Time `json:"predicted_at"`
 	Confidence     float64   `json:"confidence"` // 0-1
-	
+
 	// Actual values
-	ActualValue  float64   `json:"actual_value"`
-	ActualAt     time.Time `json:"actual_at"`
-	
+	ActualValue float64   `json:"actual_value"`
+	ActualAt    time.Time `json:"actual_at"`
+
 	// Error metrics
-	AbsoluteError      float64 `json:"absolute_error"`       // |predicted - actual|
-	PercentageError    float64 `json:"percentage_error"`     // |(predicted - actual) / actual| * 100
-	SquaredError       float64 `json:"squared_error"`        // (predicted - actual)^2
-	
+	AbsoluteError   float64 `json:"absolute_error"`   // |predicted - actual|
+	PercentageError float64 `json:"percentage_error"` // |(predicted - actual) / actual| * 100
+	SquaredError    float64 `json:"squared_error"`    // (predicted - actual)^2
+
 	// Model information
 	ModelVersion string `json:"model_version"`
 	ModelType    string `json:"model_type"` // linear, arima, lstm, ensemble
-	
+
 	// Metadata
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -54,7 +54,7 @@ func (ti *TechnicalIndicator) UpdateActual(actualValue float64) {
 	ti.ActualValue = actualValue
 	ti.ActualAt = time.Now()
 	ti.UpdatedAt = time.Now()
-	
+
 	ti.calculateErrors()
 }
 
@@ -62,12 +62,12 @@ func (ti *TechnicalIndicator) UpdateActual(actualValue float64) {
 func (ti *TechnicalIndicator) calculateErrors() {
 	// Absolute error
 	ti.AbsoluteError = math.Abs(ti.PredictedValue - ti.ActualValue)
-	
+
 	// Percentage error (avoid division by zero)
 	if ti.ActualValue != 0 {
 		ti.PercentageError = math.Abs((ti.PredictedValue - ti.ActualValue) / ti.ActualValue * 100)
 	}
-	
+
 	// Squared error
 	diff := ti.PredictedValue - ti.ActualValue
 	ti.SquaredError = diff * diff
@@ -101,17 +101,17 @@ func (ti *TechnicalIndicator) GetAge() time.Duration {
 // IndicatorBatch represents a batch of indicators for analysis
 type IndicatorBatch struct {
 	Indicators []*TechnicalIndicator `json:"indicators"`
-	
+
 	// Aggregate metrics
 	MAE  float64 `json:"mae"`  // Mean Absolute Error
 	RMSE float64 `json:"rmse"` // Root Mean Square Error
 	MAPE float64 `json:"mape"` // Mean Absolute Percentage Error
-	
+
 	// Statistics
 	TotalCount    int     `json:"total_count"`
 	AccurateCount int     `json:"accurate_count"`
 	Accuracy      float64 `json:"accuracy"` // Percentage
-	
+
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -130,26 +130,26 @@ func (ib *IndicatorBatch) calculateMetrics() {
 	if len(ib.Indicators) == 0 {
 		return
 	}
-	
+
 	var sumAE, sumSE, sumAPE float64
 	accurateCount := 0
 	validCount := 0
-	
+
 	for _, ind := range ib.Indicators {
 		if !ind.HasActual() {
 			continue
 		}
-		
+
 		validCount++
 		sumAE += ind.AbsoluteError
 		sumSE += ind.SquaredError
 		sumAPE += ind.PercentageError
-		
+
 		if ind.IsAccurate(5.0) { // 5% threshold
 			accurateCount++
 		}
 	}
-	
+
 	if validCount > 0 {
 		ib.MAE = sumAE / float64(validCount)
 		ib.RMSE = math.Sqrt(sumSE / float64(validCount))
@@ -165,17 +165,17 @@ func (ib *IndicatorBatch) GetBestIndicator() *TechnicalIndicator {
 	if len(ib.Indicators) == 0 {
 		return nil
 	}
-	
+
 	var best *TechnicalIndicator
 	minError := math.MaxFloat64
-	
+
 	for _, ind := range ib.Indicators {
 		if ind.HasActual() && ind.AbsoluteError < minError {
 			minError = ind.AbsoluteError
 			best = ind
 		}
 	}
-	
+
 	return best
 }
 
@@ -184,16 +184,16 @@ func (ib *IndicatorBatch) GetWorstIndicator() *TechnicalIndicator {
 	if len(ib.Indicators) == 0 {
 		return nil
 	}
-	
+
 	var worst *TechnicalIndicator
 	maxError := 0.0
-	
+
 	for _, ind := range ib.Indicators {
 		if ind.HasActual() && ind.AbsoluteError > maxError {
 			maxError = ind.AbsoluteError
 			worst = ind
 		}
 	}
-	
+
 	return worst
 }

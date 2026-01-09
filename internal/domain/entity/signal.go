@@ -79,13 +79,13 @@ type PriceTargets struct {
 
 // PositionAdvice 仓位建议
 type PositionAdvice struct {
-	Action        string          `json:"action"`         // BUY/HOLD/SELL
-	SizePct       decimal.Decimal `json:"size_pct"`       // 建议仓位%
-	EntryPrice    string          `json:"entry_price"`    // 入场价格区间
-	StopLossPct   decimal.Decimal `json:"stop_loss_pct"`  // 止损%
+	Action        string          `json:"action"`          // BUY/HOLD/SELL
+	SizePct       decimal.Decimal `json:"size_pct"`        // 建议仓位%
+	EntryPrice    string          `json:"entry_price"`     // 入场价格区间
+	StopLossPct   decimal.Decimal `json:"stop_loss_pct"`   // 止损%
 	TakeProfitPct decimal.Decimal `json:"take_profit_pct"` // 止盈%
-	HoldingDays   string          `json:"holding_days"`   // 持有天数
-	Reason        string          `json:"reason"`         // 建议理由
+	HoldingDays   string          `json:"holding_days"`    // 持有天数
+	Reason        string          `json:"reason"`          // 建议理由
 }
 
 // IsValid 验证信号有效性

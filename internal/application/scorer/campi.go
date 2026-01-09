@@ -10,20 +10,20 @@ import (
 // CAMPIScorer CAMP-I五维度评分器
 type CAMPIScorer struct {
 	// 权重配置
-	capitalWeight      float64
-	technicalWeight    float64
-	valuationWeight    float64
-	sectorWeight       float64
+	capitalWeight       float64
+	technicalWeight     float64
+	valuationWeight     float64
+	sectorWeight        float64
 	institutionalWeight float64
 }
 
 // NewCAMPIScorer 创建评分器
 func NewCAMPIScorer() *CAMPIScorer {
 	return &CAMPIScorer{
-		capitalWeight:      0.30, // 资金面 30%
-		technicalWeight:    0.25, // 技术面 25%
-		valuationWeight:    0.20, // 估值面 20%
-		sectorWeight:       0.15, // 板块轮动 15%
+		capitalWeight:       0.30, // 资金面 30%
+		technicalWeight:     0.25, // 技术面 25%
+		valuationWeight:     0.20, // 估值面 20%
+		sectorWeight:        0.15, // 板块轮动 15%
 		institutionalWeight: 0.10, // 机构行为 10%
 	}
 }

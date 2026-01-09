@@ -12,20 +12,20 @@ func TestLoad_DefaultConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to load config: %v", err)
 	}
-	
+
 	if cfg == nil {
 		t.Fatal("Config is nil")
 	}
-	
+
 	// Check some default values
 	if cfg.System.Name == "" {
 		t.Error("System name should not be empty")
 	}
-	
+
 	if cfg.Pipeline.Workers <= 0 {
 		t.Error("Pipeline workers should be positive")
 	}
-	
+
 	if cfg.Risk.DailyMaxLoss <= 0 {
 		t.Error("Daily max loss should be positive")
 	}
@@ -36,12 +36,12 @@ func TestLoad_EnvOverride(t *testing.T) {
 	testKey := "test-api-key-12345"
 	os.Setenv("ALPHA_KIMI_API_KEY", testKey)
 	defer os.Unsetenv("ALPHA_KIMI_API_KEY")
-	
+
 	cfg, err := Load("../../configs/config.yaml")
 	if err != nil {
 		t.Fatalf("Failed to load config: %v", err)
 	}
-	
+
 	if cfg.AI.APIKey != testKey {
 		t.Errorf("AI API Key = %v, want %v", cfg.AI.APIKey, testKey)
 	}
@@ -103,7 +103,7 @@ func TestConfig_Validate(t *testing.T) {
 			EnableMetrics: true,
 		},
 	}
-	
+
 	if err := cfg.Validate(); err != nil {
 		t.Errorf("Valid config failed validation: %v", err)
 	}
@@ -119,7 +119,7 @@ func TestConfig_ValidateForRealMode(t *testing.T) {
 			APIKey: "", // Empty API key
 		},
 	}
-	
+
 	err := cfg.ValidateForRealMode()
 	if err == nil {
 		t.Error("ValidateForRealMode should fail with empty API key")

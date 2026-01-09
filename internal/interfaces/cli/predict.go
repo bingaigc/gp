@@ -19,14 +19,14 @@ var predictCmd = &cobra.Command{
 }
 
 var (
-	predictStockCodes   string
-	predictIndicator    string
-	predictModel        string
+	predictStockCodes string
+	predictIndicator  string
+	predictModel      string
 )
 
 func init() {
 	rootCmd.AddCommand(predictCmd)
-	
+
 	predictCmd.Flags().StringVar(&predictStockCodes, "stock", "600519", "股票代码，多个用逗号分隔")
 	predictCmd.Flags().StringVar(&predictIndicator, "indicator", "MA5", "指标类型 (MA5, MA10, MA20, RSI, MACD)")
 	predictCmd.Flags().StringVar(&predictModel, "model", "linear", "模型类型 (linear, arima, lstm)")
@@ -37,23 +37,23 @@ func runPredict(cmd *cobra.Command, args []string) {
 	fmt.Println("║   技术指标预测器 v1.0.0                                    ║")
 	fmt.Println("╚═══════════════════════════════════════════════════════════╝")
 	fmt.Println()
-	
+
 	// Parse stock codes
 	codes := strings.Split(predictStockCodes, ",")
 	for i := range codes {
 		codes[i] = strings.TrimSpace(codes[i])
 	}
-	
+
 	fmt.Printf("🔮 预测配置:\n")
 	fmt.Printf("   股票代码: %v\n", codes)
 	fmt.Printf("   指标类型: %s\n", predictIndicator)
 	fmt.Printf("   模型类型: %s\n", predictModel)
 	fmt.Println()
-	
+
 	// Initialize components
 	histStorage := storage.NewHistoricalStorage()
 	modelStorage := storage.NewModelStorage()
-	
+
 	// Generate sample historical data first
 	collector := ml.NewHistoricalCollector(histStorage)
 	ctx := context.Background()
@@ -64,9 +64,9 @@ func runPredict(cmd *cobra.Command, args []string) {
 			continue
 		}
 	}
-	
+
 	predictor := ml.NewIndicatorPredictor(modelStorage, histStorage)
-	
+
 	// Make predictions
 	fmt.Println("📊 预测结果:")
 	for _, code := range codes {
@@ -75,12 +75,12 @@ func runPredict(cmd *cobra.Command, args []string) {
 			log.Printf("❌ 预测失败 %s: %v", code, err)
 			continue
 		}
-		
+
 		fmt.Printf("\n   %s - %s:\n", code, predictIndicator)
 		fmt.Printf("      预测值: %.4f\n", indicator.PredictedValue)
 		fmt.Printf("      置信度: %.2f%%\n", indicator.Confidence*100)
 		fmt.Printf("      模型: %s (%s)\n", indicator.ModelType, indicator.ModelVersion)
 	}
-	
+
 	fmt.Println("\n✅ 预测完成！")
 }

@@ -141,9 +141,9 @@ func (c *Controller) GetStats() map[string]interface{} {
 	defer c.mu.Unlock()
 
 	return map[string]interface{}{
-		"daily_loss":          c.dailyLoss,
-		"daily_signal_count":  c.dailySignalCount,
-		"consecutive_losses":  c.consecutiveLosses,
-		"market_downgrade":    c.marketDowngrade,
+		"daily_loss":         c.dailyLoss,
+		"daily_signal_count": c.dailySignalCount,
+		"consecutive_losses": c.consecutiveLosses,
+		"market_downgrade":   c.marketDowngrade,
 	}
 }

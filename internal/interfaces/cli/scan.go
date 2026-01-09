@@ -109,14 +109,14 @@ func runScan(cmd *cobra.Command, args []string) {
 func createDemoStocks() []*entity.Stock {
 	return []*entity.Stock{
 		{
-			Code:   "600519",
-			Name:   "贵州茅台",
-			Market: "SH",
+			Code:     "600519",
+			Name:     "贵州茅台",
+			Market:   "SH",
 			Industry: "白酒",
-			Price:  decimal.NewFromFloat(1680.50),
-			Change: decimal.NewFromFloat(2.3),
-			Volume: 850000,
-			Amount: decimal.NewFromFloat(1400000000),
+			Price:    decimal.NewFromFloat(1680.50),
+			Change:   decimal.NewFromFloat(2.3),
+			Volume:   850000,
+			Amount:   decimal.NewFromFloat(1400000000),
 			Capital: entity.CapitalFlow{
 				MainNetInflow:   decimal.NewFromFloat(85000000),
 				SuperNetInflow:  decimal.NewFromFloat(50000000),
@@ -143,14 +143,14 @@ func createDemoStocks() []*entity.Stock {
 			Source:    "demo",
 		},
 		{
-			Code:   "300750",
-			Name:   "宁德时代",
-			Market: "SZ",
+			Code:     "300750",
+			Name:     "宁德时代",
+			Market:   "SZ",
 			Industry: "新能源",
-			Price:  decimal.NewFromFloat(185.20),
-			Change: decimal.NewFromFloat(5.2),
-			Volume: 28000000,
-			Amount: decimal.NewFromFloat(5200000000),
+			Price:    decimal.NewFromFloat(185.20),
+			Change:   decimal.NewFromFloat(5.2),
+			Volume:   28000000,
+			Amount:   decimal.NewFromFloat(5200000000),
 			Capital: entity.CapitalFlow{
 				MainNetInflow:   decimal.NewFromFloat(320000000),
 				SuperNetInflow:  decimal.NewFromFloat(180000000),

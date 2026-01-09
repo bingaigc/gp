@@ -6,13 +6,13 @@ import "fmt"
 type ErrorType string
 
 const (
-	ErrorTypeValidation    ErrorType = "VALIDATION"
-	ErrorTypeDataFetch     ErrorType = "DATA_FETCH"
-	ErrorTypeAnalysis      ErrorType = "ANALYSIS"
-	ErrorTypeRiskControl   ErrorType = "RISK_CONTROL"
-	ErrorTypeRateLimit     ErrorType = "RATE_LIMIT"
+	ErrorTypeValidation     ErrorType = "VALIDATION"
+	ErrorTypeDataFetch      ErrorType = "DATA_FETCH"
+	ErrorTypeAnalysis       ErrorType = "ANALYSIS"
+	ErrorTypeRiskControl    ErrorType = "RISK_CONTROL"
+	ErrorTypeRateLimit      ErrorType = "RATE_LIMIT"
 	ErrorTypeCircuitBreaker ErrorType = "CIRCUIT_BREAKER"
-	ErrorTypeTimeout       ErrorType = "TIMEOUT"
+	ErrorTypeTimeout        ErrorType = "TIMEOUT"
 )
 
 // AppError 应用错误

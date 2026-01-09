@@ -28,7 +28,7 @@ var (
 
 func init() {
 	rootCmd.AddCommand(learnCmd)
-	
+
 	learnCmd.Flags().StringVar(&learnStockCode, "stock", "600519", "股票代码")
 	learnCmd.Flags().StringVar(&learnIndicator, "indicator", "MA5", "指标类型")
 	learnCmd.Flags().BoolVar(&learnAnalyze, "analyze", false, "是否进行详细分析")
@@ -41,7 +41,7 @@ func runLearn(cmd *cobra.Command, args []string) {
 	fmt.Println("║   机器学习引擎 v1.0.0                                      ║")
 	fmt.Println("╚═══════════════════════════════════════════════════════════╝")
 	fmt.Println()
-	
+
 	fmt.Printf("🎓 学习配置:\n")
 	fmt.Printf("   股票代码: %s\n", learnStockCode)
 	fmt.Printf("   指标类型: %s\n", learnIndicator)
@@ -51,29 +51,29 @@ func runLearn(cmd *cobra.Command, args []string) {
 		fmt.Printf("   学习间隔: %d秒\n", learnInterval)
 	}
 	fmt.Println()
-	
+
 	// Initialize components
 	histStorage := storage.NewHistoricalStorage()
 	modelStorage := storage.NewModelStorage()
-	
+
 	// Setup
 	collector := ml.NewHistoricalCollector(histStorage)
 	predictor := ml.NewIndicatorPredictor(modelStorage, histStorage)
 	learner := ml.NewLearningEngine(modelStorage, histStorage, predictor)
-	
+
 	ctx := context.Background()
-	
+
 	// Collect initial data
 	fmt.Println("📊 收集历史数据...")
 	_, err := collector.Collect(ctx, learnStockCode, 60)
 	if err != nil {
 		log.Fatalf("❌ 收集失败: %v", err)
 	}
-	
+
 	if learnContinuous {
 		fmt.Printf("\n🔄 开始持续学习 (每%d秒一次)...\n", learnInterval)
 		fmt.Println("按 Ctrl+C 停止")
-		
+
 		interval := time.Duration(learnInterval) * time.Second
 		learner.ContinuousLearning(ctx, learnStockCode, interval)
 	} else {
@@ -82,7 +82,7 @@ func runLearn(cmd *cobra.Command, args []string) {
 		if err := learner.Learn(ctx, learnStockCode, learnIndicator); err != nil {
 			log.Fatalf("❌ 学习失败: %v", err)
 		}
-		
+
 		// Analyze convergence if requested
 		if learnAnalyze {
 			fmt.Println("\n📊 收敛分析:")
@@ -100,7 +100,7 @@ func runLearn(cmd *cobra.Command, args []string) {
 				}
 			}
 		}
-		
+
 		fmt.Println("\n✅ 学习完成！")
 	}
 }

@@ -37,12 +37,12 @@ type DataSourceConfig struct {
 
 // AIConfig AI配置
 type AIConfig struct {
-	Provider string `yaml:"provider"`
-	Model    string `yaml:"model"`
-	BaseURL  string `yaml:"base_url"`
-	APIKey   string `yaml:"api_key"`
+	Provider string        `yaml:"provider"`
+	Model    string        `yaml:"model"`
+	BaseURL  string        `yaml:"base_url"`
+	APIKey   string        `yaml:"api_key"`
 	Timeout  time.Duration `yaml:"timeout"`
-	MaxRetry int `yaml:"max_retry"`
+	MaxRetry int           `yaml:"max_retry"`
 }
 
 // RiskConfig 风控配置

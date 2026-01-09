@@ -14,7 +14,7 @@ func TestSignalType_String(t *testing.T) {
 		{"AVOID", SignalAvoid, "AVOID"},
 		{"STRONG_AVOID", SignalStrongAvoid, "STRONG_AVOID"},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := string(tt.st); got != tt.want {
@@ -41,7 +41,7 @@ func TestFromScore(t *testing.T) {
 		{"score_45", 45, SignalStrongAvoid},
 		{"score_0", 0, SignalStrongAvoid},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := FromScore(tt.score); got != tt.want {
@@ -64,7 +64,7 @@ func TestSignalType_IsValid(t *testing.T) {
 		{"STRONG_AVOID_valid", SignalStrongAvoid, true},
 		{"invalid", SignalType("INVALID"), false},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.st.IsValid(); got != tt.want {
@@ -86,7 +86,7 @@ func TestSignalType_IsBullish(t *testing.T) {
 		{"AVOID_not_bullish", SignalAvoid, false},
 		{"STRONG_AVOID_not_bullish", SignalStrongAvoid, false},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.st.IsBullish(); got != tt.want {
@@ -108,7 +108,7 @@ func TestSignalType_IsBearish(t *testing.T) {
 		{"AVOID_bearish", SignalAvoid, true},
 		{"STRONG_AVOID_bearish", SignalStrongAvoid, true},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.st.IsBearish(); got != tt.want {
@@ -128,7 +128,7 @@ func TestRiskLevel_Constants(t *testing.T) {
 		{"MEDIUM", RiskMedium, "MEDIUM"},
 		{"HIGH", RiskHigh, "HIGH"},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := string(tt.rl); got != tt.want {

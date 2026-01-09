@@ -26,28 +26,28 @@ func NewHistoricalCollector(storage *storage.HistoricalStorage) *HistoricalColle
 // Collect collects historical data for a stock
 func (hc *HistoricalCollector) Collect(ctx context.Context, stockCode string, days int) (*entity.HistoricalDataSeries, error) {
 	log.Printf("📊 开始收集历史数据: %s, %d天", stockCode, days)
-	
+
 	// In production, fetch from EastMoney API
 	// For now, generate sample data
 	data := hc.generateSampleData(stockCode, days)
-	
+
 	// Store data
 	for _, record := range data {
 		if err := hc.storage.Save(record); err != nil {
 			return nil, fmt.Errorf("failed to save historical data: %w", err)
 		}
 	}
-	
+
 	series := entity.NewHistoricalDataSeries(stockCode, data)
 	log.Printf("✅ 收集完成: %d条记录", len(data))
-	
+
 	return series, nil
 }
 
 // CollectBatch collects historical data for multiple stocks
 func (hc *HistoricalCollector) CollectBatch(ctx context.Context, stockCodes []string, days int) (map[string]*entity.HistoricalDataSeries, error) {
 	result := make(map[string]*entity.HistoricalDataSeries)
-	
+
 	for _, code := range stockCodes {
 		series, err := hc.Collect(ctx, code, days)
 		if err != nil {
@@ -56,7 +56,7 @@ func (hc *HistoricalCollector) CollectBatch(ctx context.Context, stockCodes []st
 		}
 		result[code] = series
 	}
-	
+
 	return result, nil
 }
 
@@ -70,10 +70,10 @@ func (hc *HistoricalCollector) generateSampleData(stockCode string, days int) []
 	data := make([]*entity.HistoricalData, days)
 	now := time.Now()
 	basePrice := 100.0
-	
+
 	for i := 0; i < days; i++ {
 		date := now.AddDate(0, 0, -days+i)
-		
+
 		// Simulate price movement
 		change := (float64(i%10) - 5) * 0.5
 		open := basePrice + change
@@ -82,7 +82,7 @@ func (hc *HistoricalCollector) generateSampleData(stockCode string, days int) []
 		close := open + (float64(i%3)-1)*0.3
 		volume := 1000000.0 + float64(i%1000)*1000
 		amount := volume * close * 100
-		
+
 		record := entity.NewHistoricalData(stockCode, "Sample Stock", date)
 		record.Open = open
 		record.High = high
@@ -90,7 +90,7 @@ func (hc *HistoricalCollector) generateSampleData(stockCode string, days int) []
 		record.Close = close
 		record.Volume = volume
 		record.Amount = amount
-		
+
 		// Calculate technical indicators (simplified)
 		record.MA5 = close
 		record.MA10 = close * 0.99
@@ -100,24 +100,24 @@ func (hc *HistoricalCollector) generateSampleData(stockCode string, days int) []
 		record.MACD = close * 0.001
 		record.Signal = record.MACD * 0.9
 		record.Histogram = record.MACD - record.Signal
-		
+
 		// Volume indicators
 		record.VolumeRatio = 1.0 + float64(i%10)*0.1
 		record.Turnover = 2.0 + float64(i%5)*0.2
-		
+
 		// Capital flow (sample)
 		record.MainInflow = float64((i%10)-5) * 1000000
 		record.RetailFlow = -record.MainInflow * 0.8
-		
+
 		// Calculate change
 		if i > 0 {
 			record.CalculateChange(data[i-1].Close)
 		}
-		
+
 		data[i] = record
 		basePrice = close
 	}
-	
+
 	return data
 }
 

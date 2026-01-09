@@ -26,18 +26,18 @@ func NewModelStorage() *ModelStorage {
 func (ms *ModelStorage) Save(model *entity.PredictionModel) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	
+
 	if model.ID == "" {
 		return fmt.Errorf("model ID cannot be empty")
 	}
-	
+
 	ms.models[model.ID] = model
-	
+
 	// Set as active if it's the first model for this metric
 	if _, exists := ms.active[model.TargetMetric]; !exists || model.IsActive {
 		ms.active[model.TargetMetric] = model
 	}
-	
+
 	return nil
 }
 
@@ -45,12 +45,12 @@ func (ms *ModelStorage) Save(model *entity.PredictionModel) error {
 func (ms *ModelStorage) Get(id string) (*entity.PredictionModel, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	
+
 	model, exists := ms.models[id]
 	if !exists {
 		return nil, fmt.Errorf("model not found: %s", id)
 	}
-	
+
 	return model, nil
 }
 
@@ -58,12 +58,12 @@ func (ms *ModelStorage) Get(id string) (*entity.PredictionModel, error) {
 func (ms *ModelStorage) GetActive(targetMetric string) (*entity.PredictionModel, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	
+
 	model, exists := ms.active[targetMetric]
 	if !exists {
 		return nil, fmt.Errorf("no active model for metric: %s", targetMetric)
 	}
-	
+
 	return model, nil
 }
 
@@ -71,18 +71,18 @@ func (ms *ModelStorage) GetActive(targetMetric string) (*entity.PredictionModel,
 func (ms *ModelStorage) Update(model *entity.PredictionModel) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	
+
 	if _, exists := ms.models[model.ID]; !exists {
 		return fmt.Errorf("model not found: %s", model.ID)
 	}
-	
+
 	ms.models[model.ID] = model
-	
+
 	// Update active if this is the active model
 	if activeModel, exists := ms.active[model.TargetMetric]; exists && activeModel.ID == model.ID {
 		ms.active[model.TargetMetric] = model
 	}
-	
+
 	return nil
 }
 
@@ -90,21 +90,21 @@ func (ms *ModelStorage) Update(model *entity.PredictionModel) error {
 func (ms *ModelStorage) SetActive(id string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	
+
 	model, exists := ms.models[id]
 	if !exists {
 		return fmt.Errorf("model not found: %s", id)
 	}
-	
+
 	// Deactivate old active model
 	if oldActive, exists := ms.active[model.TargetMetric]; exists {
 		oldActive.Deactivate()
 	}
-	
+
 	// Activate new model
 	model.Activate()
 	ms.active[model.TargetMetric] = model
-	
+
 	return nil
 }
 
@@ -112,12 +112,12 @@ func (ms *ModelStorage) SetActive(id string) error {
 func (ms *ModelStorage) List() []*entity.PredictionModel {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	
+
 	models := make([]*entity.PredictionModel, 0, len(ms.models))
 	for _, model := range ms.models {
 		models = append(models, model)
 	}
-	
+
 	return models
 }
 
@@ -125,14 +125,14 @@ func (ms *ModelStorage) List() []*entity.PredictionModel {
 func (ms *ModelStorage) ListByMetric(targetMetric string) []*entity.PredictionModel {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	
+
 	var models []*entity.PredictionModel
 	for _, model := range ms.models {
 		if model.TargetMetric == targetMetric {
 			models = append(models, model)
 		}
 	}
-	
+
 	return models
 }
 
@@ -140,17 +140,17 @@ func (ms *ModelStorage) ListByMetric(targetMetric string) []*entity.PredictionMo
 func (ms *ModelStorage) Delete(id string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	
+
 	model, exists := ms.models[id]
 	if !exists {
 		return fmt.Errorf("model not found: %s", id)
 	}
-	
+
 	// Remove from active if it's the active model
 	if activeModel, exists := ms.active[model.TargetMetric]; exists && activeModel.ID == id {
 		delete(ms.active, model.TargetMetric)
 	}
-	
+
 	delete(ms.models, id)
 	return nil
 }
@@ -159,7 +159,7 @@ func (ms *ModelStorage) Delete(id string) error {
 func (ms *ModelStorage) Count() int {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	
+
 	return len(ms.models)
 }
 
@@ -167,7 +167,7 @@ func (ms *ModelStorage) Count() int {
 func (ms *ModelStorage) Clear() {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	
+
 	ms.models = make(map[string]*entity.PredictionModel)
 	ms.active = make(map[string]*entity.PredictionModel)
 }

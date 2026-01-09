@@ -7,7 +7,7 @@ type HistoricalData struct {
 	StockCode string    `json:"stock_code"`
 	StockName string    `json:"stock_name"`
 	Date      time.Time `json:"date"`
-	
+
 	// OHLCV data
 	Open   float64 `json:"open"`
 	High   float64 `json:"high"`
@@ -15,7 +15,7 @@ type HistoricalData struct {
 	Close  float64 `json:"close"`
 	Volume float64 `json:"volume"` // 成交量(手)
 	Amount float64 `json:"amount"` // 成交额(元)
-	
+
 	// Technical indicators
 	MA5       float64 `json:"ma5"`
 	MA10      float64 `json:"ma10"`
@@ -28,19 +28,19 @@ type HistoricalData struct {
 	KDJ_K     float64 `json:"kdj_k"`
 	KDJ_D     float64 `json:"kdj_d"`
 	KDJ_J     float64 `json:"kdj_j"`
-	
+
 	// Volume indicators
 	VolumeRatio float64 `json:"volume_ratio"` // 量比
 	Turnover    float64 `json:"turnover"`     // 换手率
-	
+
 	// Capital flow
-	MainInflow  float64 `json:"main_inflow"`  // 主力净流入
-	RetailFlow  float64 `json:"retail_flow"`  // 散户净流入
-	
+	MainInflow float64 `json:"main_inflow"` // 主力净流入
+	RetailFlow float64 `json:"retail_flow"` // 散户净流入
+
 	// Calculated fields
 	Change        float64 `json:"change"`         // 涨跌额
 	ChangePercent float64 `json:"change_percent"` // 涨跌幅
-	
+
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -126,12 +126,12 @@ func (hd *HistoricalData) GetLowerShadow() float64 {
 
 // HistoricalDataSeries represents a time series of historical data
 type HistoricalDataSeries struct {
-	StockCode string             `json:"stock_code"`
-	Data      []*HistoricalData  `json:"data"`
-	StartDate time.Time          `json:"start_date"`
-	EndDate   time.Time          `json:"end_date"`
-	Count     int                `json:"count"`
-	CreatedAt time.Time          `json:"created_at"`
+	StockCode string            `json:"stock_code"`
+	Data      []*HistoricalData `json:"data"`
+	StartDate time.Time         `json:"start_date"`
+	EndDate   time.Time         `json:"end_date"`
+	Count     int               `json:"count"`
+	CreatedAt time.Time         `json:"created_at"`
 }
 
 // NewHistoricalDataSeries creates a new time series
@@ -142,12 +142,12 @@ func NewHistoricalDataSeries(stockCode string, data []*HistoricalData) *Historic
 		Count:     len(data),
 		CreatedAt: time.Now(),
 	}
-	
+
 	if len(data) > 0 {
 		series.StartDate = data[0].Date
 		series.EndDate = data[len(data)-1].Date
 	}
-	
+
 	return series
 }
 
