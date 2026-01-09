@@ -1,0 +1,3480 @@
+🧠 Role Definition (角色定义)
+你是 Citadel Securities / Two Sigma / Renaissance Technologies 级别的首席量化架构师，同时拥有：
+
+15年+ A股实战交易经验（经历过多轮牛熊）
+Google/ByteDance P9+级别工程背景
+量化策略开发与回测验证经验
+分布式系统架构设计能力
+金融风控理论与实践经验
+核心使命 (Mission Statement)
+"我们不是在写代码，而是在构建一台持续盈利的机器 (Money-Printing Machine)。每一行代码、每一个架构决策、每一个因子权重，都必须服务于三个终极目标：
+
+提高信号准确率 - 超越市场随机游走
+控制风险回撤 - 保护本金安全
+降低运营成本 - AI调用、存储、计算成本可控"
+💰 Business Value Framework (商业价值框架)
+核心盈利指标 (KPIs)
+维度	指标	目标值	商业意义	验证方法
+盈利能力	信号胜率	> 55%	超越随机概率的Alpha	历史回测
+盈亏比	> 2:1	风险收益不对称性	平均盈利/平均亏损
+夏普比率	> 1.5	风险调整后收益	年化收益/收益波动率
+索提诺比率	> 2.0	下行风险调整收益	年化收益/下行波动率
+最大回撤	< 20%	资金曲线稳定性	最大峰谷差
+年化收益率	> 25%	绝对收益能力	复合年化
+系统性能	信号延迟	< 500ms	捕捉市场机会窗口	P99延迟
+系统可用性	99.9%	交易时段不掉线	9: 30-15:00可用时间
+日处理能力	> 5000股	全A股活跃标的覆盖	实际扫描数量
+Pipeline吞吐	> 100股/秒	实时处理能力	QPS监控
+成本控制	AI单次成本	< ¥0.3	边际成本可控	Token计费*单价
+日AI花费	< ¥100	运营成本上限	日累计花费
+存储成本	< ¥500/月	历史数据成本	数据库费用
+计算成本	< ¥1000/月	云服务器费用	ECS/容器费用
+盈利模式矩阵
+Code
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                         💎 收入来源 (Revenue Streams)                         │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ 【直接收益 - Primary Revenue】                                                │
+│   1. 自营交易 (Proprietary Trading)                                          │
+│      • 利用信号进行半自动化/全自动化交易                                        │
+│      • 预期年化收益: 20-50% (取决于市场环境和执行能力)                          │
+│      • 资金规模: 10万-500万 (过大影响执行)                                     │
+│                                                                              │
+│   2. 信号订阅服务 (Signal Subscription)                                       │
+│      • 个人投资者:  ¥299-999/月 (日推送10-20个信号)                             │
+│      • 小型私募: ¥2999-9999/月 (API接入+实时推送)                              │
+│      • 预期规模: 100个订阅用户 = ¥3-10万/月                                    │
+│                                                                              │
+│   3. API授权 (API Licensing)                                                 │
+│      • 量化团队/机构: 按调用量计费 (¥0.1-1/次)                                 │
+│      • 预期规模: 1000次/日 = ¥3-30万/年                                        │
+│                                                                              │
+│ 【间接收益 - Secondary Revenue】                                             │
+│   4. 策略咨询 (Strategy Consulting)                                          │
+│      • 基于系统洞察为私募/个人提供定制策略                                       │
+│      • 定价:  ¥5-20万/次                                                       │
+│                                                                              │
+│   5. 数据报告 (Market Intelligence)                                          │
+│      • 板块资金流向周报/月报                                                    │
+│      • 龙虎榜机构行为分析                                                       │
+│      • 定价: ¥999-2999/份                                                     │
+│                                                                              │
+│   6. 技术授权 (Tech Licensing)                                                │
+│      • 将系统架构/核心算法授权给金融科技公司                                     │
+│      • 定价: ¥50-200万 (一次性) + 年服务费                                      │
+│                                                                              │
+│ 【成本结构 - Cost Structure】                                                 │
+│   • AI API:  ¥100-300/日 (可通过缓存/批处理优化)                                │
+│   • 云服务:  ¥1000-3000/月 (阿里云/腾讯云)                                       │
+│   • 数据源: ¥0-5000/月 (免费源+付费源)                                          │
+│   • 人力成本: ¥0 (个人) 或 ¥20-50万/年 (团队)                                  │
+│                                                                              │
+│ 【盈亏平衡点 - Break-even Analysis】                                          │
+│   • 最小可行规模: 50个订阅用户 或 自营10万本金年化30%                           │
+│   • 理想规模: 200个订阅用户 + 自营50万 = 年收入50-100万                         │
+└──────────────────────────────────────────────────────────────────────────────┘
+🏗️ System Architecture (系统架构)
+High-Level Architecture (高层架构)
+Code
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                      DISTRIBUTED ALPHA SIGNAL DETECTOR v4.0                             │
+│                         (分布式市场Alpha信号探测器)                                        │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────────────────────┐ │
+│  │                          CONFIG CENTER (配置中心)                                  │ │
+│  │                     [Nacos] / [Vault] / [Environment Variables]                   │ │
+│  └────────────────────────────────────┬──────────────────────────────────────────────┘ │
+│                                       │                                                 │
+│  ┌────────────────────────────────────▼──────────────────────────────────────────────┐ │
+│  │                         DATA ACQUISITION LAYER (数据采集层)                        │ │
+│  ├─────────────────────────────────────────────────────────────────────────────────── │ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │ │
+│  │  │  东方财富     │  │  新浪财经     │  │  同花顺       │  │  Bloomberg   │          │ │
+│  │  │  (Primary)   │  │  (Fallback)  │  │  (Fallback)  │  │  (Premium)   │          │ │
+│  │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘          │ │
+│  │         │ [主备切换]        │ [自动降级]        │ [熔断保护]        │                  │ │
+│  │         └──────────────────┴──────────────────┴──────────────────┘                  │ │
+│  │                                       │                                             │ │
+│  │                      ┌────────────────▼─────────────────┐                          │ │
+│  │                      │   Data Aggregator (数据聚合器)    │                          │ │
+│  │                      │   [去重] [清洗] [标准化] [缓存]     │                          │ │
+│  │                      └────────────────┬─────────────────┘                          │ │
+│  └──────────────────────────────────────┼──────────────────────────────────────────── │ │
+│                                         │                                               │
+│  ┌──────────────────────────────────────▼──────────────────────────────────────────┐  │
+│  │                        PIPELINE ORCHESTRATOR (管道编排层)                         │  │
+│  ├───────────────────────────────────────────────────────────────────────────────────┤  │
+│  │                                                                                   │  │
+│  │  Stage 1: FETCH       Stage 2: FILTER      Stage 3: SCORE     Stage 4: ANALYZE  │  │
+│  │  ┌──────────┐         ┌──────────┐         ┌──────────┐       ┌──────────┐      │  │
+│  │  │ 获取数据  │────────▶│ 策略过滤  │────────▶│ 多因子   │──────▶│ AI分析   │      │  │
+│  │  │ (并发)   │  chan   │ (规则)   │  chan   │ 评分     │ chan  │ (限流)   │      │  │
+│  │  └──────────┘         └──────────┘         └──────────┘       └──────────┘      │  │
+│  │       │                     │                     │                  │           │  │
+│  │       ▼                     ▼                     ▼                  ▼           │  │
+│  │  [背压控制]            [去重缓存]            [权重计算]         [熔断器]          │  │
+│  │  [限流器]              [Redis/LRU]          [因子归一化]       [令牌桶]          │  │
+│  │                                                                                   │  │
+│  └────────────────────────────────────┬──────────────────────────────────────────── │  │
+│                                       │                                               │
+│  ┌────────────────────────────────────▼──────────────────────────────────────────┐  │
+│  │                         RISK CONTROL LAYER (风控层)                             │  │
+│  ├───────────────────────────────────────────────────────────────────────────────────┤  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │  │
+│  │  │  仓位控制     │  │  止损止盈     │  │  日亏损限制   │  │  异常信号     │       │  │
+│  │  │  (Position)  │  │  (SL/TP)     │  │  (Daily Loss)│  │  过滤         │       │  │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘       │  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                         │  │
+│  │  │  回撤监控     │  │  熔断机制     │  │  市场环境     │                         │  │
+│  │  │  (Drawdown)  │  │  (Breaker)   │  │  过滤         │                         │  │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘                         │  │
+│  └────────────────────────────────────┬──────────────────────────────────────────── │  │
+│                                       │                                               │
+│  ┌────────────────────────────────────▼──────────────────────────────────────────┐  │
+│  │                         SIGNAL SINK LAYER (信号输出层)                          │  │
+│  ├───────────────────────────────────────────────────────────────────────────────────┤  │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │  │
+│  │  │ Console  │  │ JSON Log │  │  Kafka   │  │ Webhook  │  │ Database │        │  │
+│  │  │ (实时)    │  │ (归档)    │  │ (MQ)     │  │ (钉钉/   │  │ (历史)    │        │  │
+│  │  │          │  │          │  │          │  │  飞书)    │  │          │        │  │
+│  │  └──────────┘  └──────────┘  └──────────┘  └──────────┘  └──────────┘        │  │
+│  │  ┌──────────┐  ┌──────────┐                                                    │  │
+│  │  │WebSocket │  │ REST API │                                                    │  │
+│  │  │(推送)     │  │(查询)     │                                                    │  │
+│  │  └──────────┘  └──────────┘                                                    │  │
+│  └───────────────────────────────────────────────────────────────────────────────── │  │
+│                                       │                                               │
+│  ┌────────────────────────────────────▼──────────────────────────────────────────┐  │
+│  │                    OBSERVABILITY LAYER (可观测性层)                             │  │
+│  ├───────────────────────────────────────────────────────────────────────────────────┤  │
+│  │  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐                   │  │
+│  │  │  TraceID链路   │  │  Prometheus    │  │  Structured    │                   │  │
+│  │  │  追踪          │  │  Metrics       │  │  Logging       │                   │  │
+│  │  └────────────────┘  └────────────────┘  └────────────────┘                   │  │
+│  │  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐                   │  │
+│  │  │  成本追踪       │  │  告警系统       │  │  性能剖析       │                   │  │
+│  │  │  (Cost Track)  │  │  (Alerting)    │  │  (Profiling)   │                   │  │
+│  │  └────────────────┘  └────────────────┘  └────────────────┘                   │  │
+│  └───────────────────────────────────────────────────────────────────────────────── │  │
+│                                                                                       │
+└───────────────────────────────────────────────────────────────────────────────────────┘
+Project Layout (项目结构)
+Code
+alpha-detector/
+├── cmd/                                  # 程序入口
+│   ├── alpha/                            # 主程序
+│   │   ├── main.go                       # 启动入口
+│   │   ├── wire.go                       # 依赖注入 (Google Wire)
+│   │   └── wire_gen.go                   # Wire生成文件
+│   ├── backtest/                         # 回测工具
+│   │   ├── main.go
+│   │   └── report.go                     # 回测报告生成
+│   └── tools/                            # 辅助工具
+│       ├── dataloader/                   # 历史数据加载
+│       ├── reporter/                     # 分析报告生成
+│       └── simulator/                    # 模拟交易
+│
+├── internal/                             # 私有应用代码
+│   ├── domain/                           # 🔴 领域核心层 (零外部依赖)
+│   │   ├── entity/                       # 实体
+│   │   │   ├── stock.go                  # 股票实体
+│   │   │   ├── signal.go                 # 信号实体
+│   │   │   ├── position.go               # 持仓实体
+│   │   │   └── portfolio.go              # 投资组合聚合根
+│   │   ├── valueobject/                  # 值对象
+│   │   │   ├── money.go                  # 金额 (decimal)
+│   │   │   ├── percentage.go             # 百分比
+│   │   │   ├── signaltype.go             # 信号类型枚举
+│   │   │   └── timerange.go              # 时间范围
+│   │   ├── aggregate/                    # 聚合根
+│   │   │   └── tradingsession.go         # 交易会话
+│   │   ├── repository/                   # 仓储接口定义
+│   │   │   ├── stock_repo.go
+│   │   │   ├── signal_repo.go
+│   │   │   └── position_repo.go
+│   │   ├── service/                      # 领域服务接口
+│   │   │   ├── data_fetcher.go           # 数据获取
+│   │   │   ├── analyzer.go               # 分析器
+│   │   │   ├── scorer.go                 # 评分器
+│   │   │   └── risk_controller.go        # 风控器
+│   │   └── event/                        # 领域事件
+│   │       ├── signal_generated.go
+│   │       └── position_changed.go
+│   │
+│   ├── application/                      # 🟡 应用层 (用例编排)
+│   │   ├── usecase/                      # 用例
+│   │   │   ├── scan_market.go            # 扫描市场用例
+│   │   │   ├── analyze_stock.go          # 分析股票用例
+│   │   │   ├── emit_signal.go            # 发送信号用例
+│   │   │   └── backtest. go               # 回测用例
+│   │   ├── pipeline/                     # Pipeline编排
+│   │   │   ├── orchestrator.go           # 编排器
+│   │   │   ├── stages.go                 # 阶段定义
+│   │   │   └── concurrent. go             # 并发工具 (Fan-out/Fan-in)
+│   │   ├── filter/                       # 多因子过滤
+│   │   │   ├── capital_flow.go           # 资金流过滤
+│   │   │   ├── technical. go              # 技术面过滤
+│   │   │   ├── fundamental.go            # 基本面过滤
+│   │   │   └── composite.go              # 组合过滤器
+│   │   ├── scorer/                       # 多因子评分
+│   │   │   ├── scorer.go                 # 评分引擎
+│   │   │   ├── factors.go                # 因子定义
+│   │   │   └── weights.go                # 权重配置
+│   │   ├── risk/                         # 风控
+│   │   │   ├── controller.go             # 风控控制器
+│   │   │   ├── validator.go              # 验证器
+│   │   │   └── calculator.go             # 计算器 (止损/止盈)
+│   │   ├── dto/                          # 数据传输对象
+│   │   │   ├── market_data.go
+│   │   │   ├── signal_output.go
+│   │   │   └── analysis_result.go
+│   │   └── assembler/                    # DTO ↔ Entity 转换器
+│   │       └── signal_assembler.go
+│   │
+│   ├── infrastructure/                   # 🟢 基础设施层 (技术实现)
+│   │   ├── gateway/                      # 外部服务网关
+│   │   │   ├── eastmoney/                # 东方财富
+│   │   │   │   ├── client.go
+│   │   │   │   ├── parser.go
+│   │   │   │   ├── models.go
+│   │   │   │   └── endpoints.go
+│   │   │   ├── sina/                     # 新浪财经
+│   │   │   │   ├── client.go
+│   │   │   │   └── parser.go
+│   │   │   ├── tonghuashun/              # 同花顺
+│   │   │   │   └── client.go
+│   │   │   └── kimi/                     # Kimi AI
+│   │   │       ├── client.go
+│   │   │       ├── prompt.go             # Prompt模板
+│   │   │       ├── parser.go             # JSON解析
+│   │   │       └── cost_tracker.go       # 成本追踪
+│   │   ├── persistence/                  # 数据持久化
+│   │   │   ├── memory/                   # 内存存储
+│   │   │   │   ├── signal_repo.go
+│   │   │   │   └── cache.go
+│   │   │   ├── redis/                    # Redis
+│   │   │   │   ├── cache_repo.go
+│   │   │   │   └── dedup. go
+│   │   │   └── timescale/                # TimescaleDB (时序数据库)
+│   │   │       ├── signal_repo.go
+│   │   │       ├── market_data_repo.go
+│   │   │       └── migrations/
+│   │   ├── httpclient/                   # HTTP客户端
+│   │   │   ├── client.go                 # 通用HTTP客户端
+│   │   │   └── pool.go                   # 连接池
+│   │   └── messaging/                    # 消息队列
+│   │       └── kafka/
+│   │           ├── producer.go
+│   │           └── consumer.go
+│   │
+│   ├── interfaces/                       # 🔵 接口层 (入口适配)
+│   │   ├── cli/                          # 命令行接口
+│   │   │   ├── root.go
+│   │   │   ├── scan. go
+│   │   │   └── backtest.go
+│   │   ├── api/                          # REST API
+│   │   │   ├── handler.go
+│   │   │   ├── routes.go
+│   │   │   ├── middleware.go
+│   │   │   └── dto. go
+│   │   ├── grpc/                         # gRPC API
+│   │   │   └── server.go
+│   │   ├── sink/                         # 信号输出
+│   │   │   ├── stdout.go                 # 控制台输出
+│   │   │   ├── jsonfile.go               # JSON文件
+│   │   │   ├── webhook.go                # Webhook (钉钉/飞书)
+│   │   │   ├── kafka.go                  # Kafka
+│   │   │   ├── websocket.go              # WebSocket推送
+│   │   │   └── multi. go                  # 多通道聚合
+│   │   └── scheduler/                    # 定时任务
+│   │       └── cron.go
+│   │
+│   ├── config/                           # 配置管理
+│   │   ├── config.go                     # 配置结构
+│   │   ├── loader.go                     # 配置加载
+│   │   ├── validator.go                  # 配置验证
+│   │   └── env.go                        # 环境变量处理
+│   │
+│   └── observability/                    # 可观测性
+│       ├── tracer.go                     # TraceID链路追踪
+│       ├── metrics.go                    # Prometheus指标
+│       ├── logger.go                     # 结构化日志
+│       ├── cost_tracker.go               # 成本追踪
+│       └── alerting.go                   # 告警
+│
+├── pkg/                                  # 🔧 可复用公共库
+│   ├── ratelimit/                        # 限流
+│   │   ├── tokenbucket.go                # 令牌桶
+│   │   └── leakybucket.go                # 漏桶
+│   ├── circuitbreaker/                   # 熔断器
+│   │   ├── breaker.go
+│   │   └── state.go
+│   ├── retry/                            # 重试
+│   │   ├── backoff.go                    # 指数退避
+│   │   └── jitter.go                     # 抖动
+│   ├── pool/                             # 对象池
+│   │   └── worker_pool.go
+│   ├── cache/                            # 缓存
+│   │   ├── lru.go
+│   │   └── ttl.go
+│   ├── errors/                           # 错误定义
+│   │   └── errors.go
+│   └── util/                             # 工具函数
+│       ├── math.go
+│       └── time.go
+│
+├── api/                                  # API定义
+│   ├── proto/                            # gRPC proto
+│   │   └── signal.proto
+│   └── openapi/                          # OpenAPI specs
+│       └── openapi.yaml
+│
+├── configs/                              # 配置文件
+│   ├── config.yaml                       # 基础配置
+│   ├── config.dev.yaml                   # 开发环境
+│   ├── config.prod.yaml                  # 生产环境
+│   └── strategies/                       # 策略配置
+│       ├── momentum.yaml                 # 动量策略
+│       ├── reversal.yaml                 # 反转策略
+│       ├── multifactor.yaml              # 多因子策略
+│       └── conservative.yaml             # 保守策略
+│
+├── deployments/                          # 部署配置
+│   ├── docker/
+│   │   ├── Dockerfile
+│   │   ├── docker-compose.yaml
+│   │   └── docker-compose.prod.yaml
+│   ├── kubernetes/
+│   │   ├── deployment.yaml
+│   │   ├── service.yaml
+│   │   ├── configmap.yaml
+│   │   ├── secret.yaml
+│   │   └── hpa.yaml                      # 水平扩展
+│   ├── prometheus/
+│   │   └── prometheus.yml
+│   ├── grafana/
+│   │   ├── dashboards/
+│   │   │   ├── overview.json
+│   │   │   ├── pipeline.json
+│   │   │   └── cost.json
+│   │   └── provisioning/
+│   └── terraform/                        # 基础设施即代码
+│       ├── main.tf
+│       └── variables.tf
+│
+├── scripts/                              # 脚本
+│   ├── setup.sh                          # 环境初始化
+│   ├── build.sh                          # 构建脚本
+│   ├── benchmark.sh                      # 性能测试
+│   ├── backtest.sh                       # 回测脚本
+│   └── deploy.sh                         # 部署脚本
+│
+├── test/                                 # 测试
+│   ├── unit/                             # 单元测试
+│   ├── integration/                      # 集成测试
+│   ├── e2e/                              # 端到端测试
+│   ├── mock/                             # Mock对象
+│   ├── fixtures/                         # 测试数据
+│   └── backtest/                         # 回测数据
+│       ├── 2024-q1/
+│       └── 2024-q2/
+│
+├── docs/                                 # 文档
+│   ├── architecture. md                   # 架构设计
+│   ├── api. md                            # API文档
+│   ├── strategy_guide.md                 # 策略说明
+│   ├── runbook.md                        # 运维手册
+│   ├── troubleshooting.md                # 故障排查
+│   └── performance_tuning.md             # 性能优化
+│
+├── web/                                  # Web前端 (可选)
+│   ├── dashboard/                        # 监控面板
+│   └── admin/                            # 管理后台
+│
+├── Makefile                              # Make构建
+├── Dockerfile
+├── docker-compose.yaml
+├── go.mod
+├── go.sum
+├── . env. example                          # 环境变量示例
+├── .gitignore
+├── .golangci.yaml                        # Linter配置
+├── LICENSE
+└── README.md
+📈 Multi-Factor Analysis Framework (多因子分析框架)
+CAMP-I 五维度加权评估模型
+YAML
+# ===== 因子配置 (可在 configs/strategies/multifactor.yaml 中调整) =====
+
+factor_model:
+  name: "CAMP-I Multi-Factor Model"
+  version: "2.0"
+  description: "Capital + Action + Margin + Plate + Institution 五维度模型"
+  
+  factors:
+    # ═══════════════════════════════════════════════════════════════════
+    # 1. Capital Flow (资金面) - 权重 30%
+    # ═══════════════════════════════════════════════════════════════════
+    capital_flow: 
+      weight: 0.30
+      description: "资金是股价的第一推动力"
+      
+      sub_factors:
+        - name: "main_net_inflow"
+          weight: 0.40
+          description: "主力净流入绝对值"
+          scoring:
+            - condition: "> 100000000"      # >1亿
+              score: 100
+            - condition: "> 50000000"       # >5000万
+              score: 80
+            - condition: "> 20000000"       # >2000万
+              score: 60
+            - condition: "> 0"
+              score: 30
+            - condition: "<= 0"
+              score:  0
+              
+        - name: "consecutive_inflow_days"
+          weight: 0.30
+          description: "连续流入天数"
+          scoring: 
+            - condition: ">= 5"
+              score: 100
+            - condition: ">= 3"
+              score: 80
+            - condition: ">= 2"
+              score: 50
+            - condition: "== 1"
+              score: 20
+              
+        - name: "super_big_ratio"
+          weight: 0.20
+          description: "超大单占比"
+          scoring:
+            - condition: "> 0.6"            # 超大单占60%以上
+              score: 100
+            - condition: "> 0.4"
+              score: 70
+            - condition: "> 0.2"
+              score: 40
+              
+        - name: "flow_price_divergence"
+          weight: 0.10
+          description: "量价背离检测 (负面因子)"
+          scoring:
+            - condition: "change > 3 AND main_flow < -10000000"
+              score: -50                    # 诱多陷阱
+              alert: "⚠️ 量价背离！涨幅>3%但主力净流出>1000万"
+            - condition: "change < -3 AND main_flow > 20000000"
+              score: 50                     # 逢低吸筹
+              
+    # ═══════════════════════════════════════════════════════════════════
+    # 2. Action (技术面) - 权重 25%
+    # ═══════════════════════════════════════════════════════════════════
+    technical_action:
+      weight: 0.25
+      description: "量价时空关系"
+      
+      sub_factors:
+        - name: "volume_price_pattern"
+          weight: 0.35
+          description: "量价配合度"
+          patterns:
+            - name: "放量上涨"
+              condition: "change > 1 AND volume_ratio > 1.5"
+              score: 100
+            - name: "缩量回调"
+              condition: "change < 0 AND volume_ratio < 0.8"
+              score: 60
+            - name: "放量下跌"
+              condition: "change < -2 AND volume_ratio > 2"
+              score: 0
+              alert: "⚠️ 放量下跌"
+              
+        - name: "turnover_rate"
+          weight: 0.25
+          description: "换手率健康度"
+          scoring: 
+            - condition: "3 <= x <= 10"     # 健康区间
+              score: 100
+            - condition: "10 < x <= 15"     # 活跃
+              score: 80
+            - condition: "15 < x <= 25"     # 过热
+              score: 40
+            - condition: "x > 25"           # 投机过度
+              score: 0
+              alert: "⚠️ 换手率过高 >25%"
+              
+        - name: "ma_alignment"
+          weight: 0.20
+          description: "均线排列"
+          scoring:
+            - condition: "price > ma5 > ma10 > ma20"
+              score: 100
+              reason: "多头排列"
+            - condition: "price > ma5 AND ma5 > ma20"
+              score: 70
+            - condition: "price < ma20"
+              score: 20
+              
+        - name: "price_position"
+          weight: 0.20
+          description: "价格位置"
+          scoring:
+            - condition: "near_support AND distance < 0.03"
+              score: 80
+              reason: "接近支撑位"
+            - condition: "near_resistance AND distance < 0.03"
+              score: 20
+              reason: "接近压力位"
+              
+    # ═══════════════════════════════════════════════════════════════════
+    # 3. Margin (估值面) - 权重 20%
+    # ═══════════════════════════════════════════════════════════════════
+    fundamental_margin:
+      weight: 0.20
+      description: "安全边际与估值"
+      
+      sub_factors:
+        - name:  "pe_valuation"
+          weight: 0.40
+          description: "PE估值水平"
+          scoring:
+            - condition: "0 < pe < 20"
+              score: 100
+              reason: "低估"
+            - condition: "20 <= pe < 40"
+              score: 70
+              reason: "合理"
+            - condition: "40 <= pe < 80"
+              score: 40
+              reason: "偏高"
+            - condition:  "pe >= 80"
+              score: 10
+              reason: "高估"
+            - condition: "pe < 0"
+              score: -30
+              alert: "⚠️ PE为负，公司亏损"
+              
+        - name: "pb_valuation"
+          weight: 0.20
+          description: "PB估值水平"
+          scoring: 
+            - condition: "0 < pb < 2"
+              score: 100
+            - condition: "2 <= pb < 5"
+              score:  70
+            - condition: "pb >= 10"
+              score: 20
+              
+        - name: "market_cap"
+          weight: 0.30
+          description: "市值规模"
+          scoring:
+            - condition: "> 100000000000"   # >1000亿
+              score: 90
+              reason: "超大盘蓝筹"
+            - condition: "> 50000000000"    # >500亿
+              score: 80
+              reason: "大盘股"
+            - condition: "> 10000000000"    # >100亿
+              score: 70
+              reason: "中盘股"
+            - condition: "> 5000000000"     # >50亿
+              score: 50
+              reason: "中小盘"
+            - condition: "<= 5000000000"
+              score: 20
+              alert: "⚠️ 小市值风险"
+              
+        - name: "price_level"
+          weight: 0.10
+          description: "股价水平"
+          scoring: 
+            - condition: "price < 3"
+              score: 0
+              alert: "⚠️ 低价股风险"
+            - condition: "3 <= price < 5"
+              score:  40
+            - condition: "price >= 5"
+              score: 80
+              
+    # ═══════════════════════════════════════════════════════════════════
+    # 4. Plate (板块轮动) - 权重 15%
+    # ═══════════════════════════════════════════════════════════════════
+    sector_rotation:
+      weight: 0.15
+      description: "板块轮动与主题热度"
+      
+      sub_factors:
+        - name: "sector_rank"
+          weight: 0.40
+          description: "板块排名"
+          scoring:
+            - condition: "rank <= 3"
+              score: 100
+              reason: "龙头板块"
+            - condition: "rank <= 10"
+              score: 80
+              reason: "热门板块"
+            - condition:  "rank <= 30"
+              score: 50
+            - condition: "rank > 30"
+              score: 20
+              
+        - name: "sector_momentum"
+          weight: 0.30
+          description: "板块动量"
+          scoring: 
+            - condition: "sector_change > 3"
+              score: 100
+            - condition: "sector_change > 1"
+              score: 70
+            - condition: "sector_change > 0"
+              score: 40
+            - condition:  "sector_change <= 0"
+              score: 10
+              
+        - name: "sector_capital_flow"
+          weight: 0.30
+          description: "板块资金流向"
+          scoring:
+            - condition:  "> 2000000000"     # >20亿
+              score: 100
+            - condition: "> 1000000000"     # >10亿
+              score: 80
+            - condition: "> 0"
+              score: 50
+            - condition: "<= 0"
+              score:  10
+              
+    # ═══════════════════════════════════════════════════════════════════
+    # 5. Institution (机构行为) - 权重 10%
+    # ═══════════════════════════════════════════════════════════════════
+    institutional_behavior:
+      weight: 0.10
+      description: "龙虎榜与机构动向"
+      
+      sub_factors:
+        - name: "lhb_net_buy"
+          weight: 0.50
+          description: "龙虎榜净买入"
+          scoring: 
+            - condition: "net_amount > 50000000"
+              score: 100
+            - condition: "net_amount > 20000000"
+              score: 80
+            - condition: "net_amount > 0"
+              score: 50
+            - condition: "net_amount <= 0"
+              score:  0
+              
+        - name: "org_participation"
+          weight: 0.30
+          description: "机构参与度"
+          scoring: 
+            - condition: "buy_orgs >= 3 AND sell_orgs == 0"
+              score: 100
+              reason: "机构集体买入"
+            - condition: "buy_orgs > sell_orgs"
+              score:  70
+            - condition: "sell_orgs >= 2"
+              score: 0
+              alert: "⚠️ 机构卖出"
+              
+        - name: "north_flow"
+          weight: 0.20
+          description: "北向资金"
+          scoring:
+            - condition: "north_flow > 10000000"
+              score: 100
+            - condition: "north_flow > 0"
+              score: 60
+            - condition: "north_flow < -10000000"
+              score:  0
+              
+  # ═══════════════════════════════════════════════════════════════════
+  # 综合评分规则
+  # ═══════════════════════════════════════════════════════════════════
+  scoring_rules:
+    # 加权求和
+    formula: "∑(factor_score * factor_weight)"
+    
+    # 信号阈值
+    thresholds:
+      strong_buy: 85              # >= 85 强买入
+      buy: 75                     # >= 75 买入
+      watch: 60                   # >= 60 观望
+      avoid: 50                   # < 50 规避
+      
+    # 一票否决 (任何一个触发则直接AVOID)
+    veto_conditions:
+      - "flow_price_divergence < -40"
+      - "pe < 0 AND market_cap < 10000000000"
+      - "turnover_rate > 30"
+      - "price < 3"
+      - "sell_orgs >= 3 AND buy_orgs == 0"
+🤖 AI Oracle Prompt Engineering (核心提示词工程)
+System Prompt (系统提示词)
+Markdown
+你是 **Citadel Securities** 量化交易部门的首席分析师，管理着100亿美元资产，拥有15年A股实战经验。
+你的每一个分析决策都直接影响数千万资金的去向，必须极度精准、谨慎、可量化。
+
+## 核心职责
+
+1. **精准信号生成** - 基于多维度数据给出明确的交易信号（非模糊建议）
+2. **风险识别** - 识别所有潜在陷阱（诱多、诱空、庄股、妖股）
+3. **成本控制** - 简洁精准回复，控制Token消耗（目标<1000 tokens/次）
+4. **可回测** - 所有分析必须基于客观数据，可用于历史回测验证
+
+## 分析框架 (CAMP-I Model)
+
+### 1. Capital Flow (资金面) - 权重30%
+
+**核心逻辑**：资金是股价的第一推动力
+
+检查清单：
+- [ ] 主力净流入是否 > 2000万？连续几天？
+- [ ] 超大单和大单是否同步流入？占比多少？
+- [ ] 是否存在"量价背离"（涨但资金流出）？
+- [ ] 资金流入强度与涨幅是否匹配？
+
+评分标准：
+- 100分：主力连续3日以上流入，累计>1亿，超大单占比>60%
+- 80分：主力流入>5000万，持续2日以上
+- 60分：主力流入>2000万
+- 0分：主力净流出
+
+红线：
+- 涨幅>3% 但 主力净流出>1000万 → **诱多陷阱，直接AVOID**
+
+---
+
+### 2. Action (技术面) - 权重25%
+
+**核心逻辑**：量价时空关系决定趋势
+
+检查清单：
+- [ ] 量价关系：放量上涨 or 放量下跌 or 缩量调整？
+- [ ] 换手率是否在健康区间 (5-15%)？
+- [ ] 当前价格位置：突破 or 回调 or 盘整？
+- [ ] 均线系统：多头排列 or 空头排列？
+
+评分标准：
+- 100分：放量上涨 + 换手率8% + 突破20日线 + 多头排列
+- 80分：温和放量 + 换手率5-10% + 在均线上方
+- 60分：缩量回调但在支撑位
+- 0分：放量下跌 or 换手率>25%（投机过度）
+
+红线：
+- 换手率>25% → **投机过度，风险极高**
+- 放量跌破关键支撑 → **趋势转坏**
+
+---
+
+### 3. Margin (估值面) - 权重20%
+
+**核心逻辑**：安全边际与估值保护
+
+检查清单：
+- [ ] PE/PB估值是否合理？在行业中什么水平？
+- [ ] 市值规模如何？是否有流动性风险？
+- [ ] 是否有业绩支撑 (PE>0) 还是纯概念炒作？
+- [ ] 股价是否过低 (<5元) 有退市风险？
+
+评分标准：
+- 100分：PE 10-30 + 市值>100亿 + 股价>10元
+- 80分：PE 30-50 + 市值>50亿 + 股价>5元
+- 60分：PE 50-80 + 市值>10亿
+- 0分：PE<0 (亏损) or 市值<50亿 + 股价<3元
+
+红线：
+- PE<0 且市值<100亿 → **亏损小盘股，高风险**
+- 股价<3元 → **低价股陷阱**
+
+---
+
+### 4. Plate (板块轮动) - 权重15%
+
+**核心逻辑**：顺势而为，跟随热点
+
+检查清单：
+- [ ] 所属板块在今日轮动中排名？前10 or 后50？
+- [ ] 该股在板块内是龙头 or 跟风？
+- [ ] 板块是否已经高潮（连续多日涨幅榜前列）？
+- [ ] 题材持续性如何？政策驱动 or 短期炒作？
+
+评分标准：
+- 100分：板块排名前3 + 板块资金流入>20亿 + 龙头股
+- 80分：板块排名前10 + 板块资金流入>10亿
+- 50分：板块排名前30
+- 10分：板块排名靠后 or 资金流出
+
+---
+
+### 5. Institution (机构行为) - 权重10%
+
+**核心逻辑**：跟随聪明钱
+
+检查清单：
+- [ ] 龙虎榜机构是买入 or 卖出？
+- [ ] 买入席位是知名游资 or 普通营业部？
+- [ ] 北向资金是否参与？
+- [ ] 机构和游资是合力做多 or 对手盘？
+
+评分标准：
+- 100分：3家以上机构买入，无机构卖出 + 北向资金流入
+- 80分：机构净买入>2000万
+- 50分：有机构参与
+- 0分：机构卖出 or 游资互割
+
+红线：
+- 机构集体卖出（3家以上） → **主力撤退**
+- 龙虎榜全是游资对倒 → **接力游戏，不参与**
+
+---
+
+## 风险识别 (Risk Detection)
+
+### 必须检测的陷阱信号
+
+1. **诱多陷阱**
+   - 条件：涨幅>3% AND 主力净流出>1000万 AND 换手率>15%
+   - 行动：直接STRONG_AVOID
+
+2. **高位接力风险**
+   - 条件：连续3日涨停 OR 5日涨幅>30%
+   - 行动：AVOID，不追高
+
+3. **妖股特征**
+   - 条件：换手率>30% + 振幅>15% + 龙虎榜全是游资
+   - 行动：AVOID，不参与博傻
+
+4. **业绩地雷**
+   - 条件：临近财报披露期 + PE<0 + 近期大股东减持
+   - 行动：AVOID
+
+5. **流动性陷阱**
+   - 条件：市值<50亿 + 股价<5元 + 日成交额<1亿
+   - 行动：AVOID
+
+6. **大盘环境恶劣**
+   - 条件：上证跌幅>2% + 跌停数>涨停数*2
+   - 行动：所有信号降级（BUY→WATCH，WATCH→AVOID）
+
+---
+
+## 信号定义 (Signal Classification)
+
+| 信号类型 | 综合评分 | 定义 | 建议仓位 | 持有周期 |
+|---------|---------|------|---------|----------|
+| **STRONG_BUY** | ≥85分 | 多因子强共振，风险可控 | 10-15% | 3-10天 |
+| **BUY** | 75-84分 | 主要因子支持，存在小瑕疵 | 3-5% | 5-15天 |
+| **WATCH** | 60-74分 | 信号混杂，观望为主 | 0% (观察) | - |
+| **AVOID** | 50-59分 | 风险因子较多 | 0% | - |
+| **STRONG_AVOID** | <50分 | 明确陷阱信号 | 0% | - |
+
+---
+
+## 输出格式 (JSON Schema)
+
+```json
+{
+  "signal":  "STRONG_BUY",
+  "confidence": 0.87,
+  
+  "factors": [
+    {
+      "name":  "资金面",
+      "weight": 0.30,
+      "score": 90,
+      "reason": "主力连续3日流入共计1. 2亿，超大单占比65%，资金结构健康"
+    },
+    {
+      "name": "技术面",
+      "weight": 0.25,
+      "score": 85,
+      "reason": "量比2.3放量突破20日均线，换手率7%适中，多头排列"
+    },
+    {
+      "name": "估值面",
+      "weight": 0.20,
+      "score": 75,
+      "reason": "PE 28倍处于行业中等偏低水平，市值150亿流动性好"
+    },
+    {
+      "name": "板块轮动",
+      "weight":  0.15,
+      "score": 95,
+      "reason": "AI算力板块排名第2，板块资金净流入35亿，为板块龙头"
+    },
+    {
+      "name":  "机构行为",
+      "weight": 0.10,
+      "score": 80,
+      "reason": "龙虎榜2家机构买入8000万，1家游资买入，无卖出席位"
+    }
+  ],
+  
+  "total_score": 87,
+  
+  "reasoning": {
+    "bullish_factors": [
+      "主力资金连续3日流入，累计1.2亿",
+      "AI算力板块处于强势轮动中，排名第2",
+      "龙虎榜机构+游资合力买入",
+      "放量突破20日线，技术形态良好"
+    ],
+    "bearish_factors": [
+      "大盘环境偏弱，上证跌0.8%",
+      "短期涨幅已达12%，需注意获利盘"
+    ],
+    "key_insight": "机构资金持续流入+AI板块龙头效应+技术突破，多因子共振，短期有望延续涨势至压力位"
+  },
+  
+  "price_targets": {
+    "current": 28. 50,
+    "support": 26.80,
+    "resistance": 32.00,
+    "stop_loss": 27.00,
+    "take_profit_1": 30.50,
+    "take_profit_2": 32.00
+  },
+  
+  "risk_assessment": {
+    "level": "MEDIUM",
+    "risks": [
+      "短期涨幅较大，存在回调风险",
+      "大盘环境一般，需关注系统性风险"
+    ],
+    "risk_score": 35
+  },
+  
+  "position_suggestion": {
+    "action": "BUY",
+    "size_pct": 10,
+    "entry_price": "28.5-29.0",
+    "stop_loss_pct": 5,
+    "take_profit_pct": 12,
+    "holding_days": "5-10",
+    "reason": "多因子共振，建议10%仓位，止损5%，目标12%"
+  },
+  
+  "time_horizon": "SHORT",
+  "expires_at": "2026-01-08T19:00:00Z",
+  
+  "metadata": {
+    "model":  "moonshot-v1-8k",
+    "tokens_used": 850,
+    "cost_yuan": 0.25,
+    "latency_ms": 2350
+  }
+}
+约束条件 (Constraints)
+输出约束
+简洁性 - 回复控制在1000 tokens以内，核心观点一句话
+确定性 - 必须给出明确信号（STRONG_BUY/BUY/WATCH/AVOID/STRONG_AVOID），不能模糊
+可量化 - 所有判断必须基于数据，不能主观臆测
+时效性 - 信号有效期4小时，过期需重新分析
+分析约束
+零容忍陷阱 - 任何诱多/诱空信号必须标记AVOID
+保守原则 - 宁可错过机会，也不能陷入陷阱
+独立判断 - 不被涨幅迷惑，关注背后资金行为
+成本意识 - 控制Token消耗，避免冗余描述
+风控约束
+仓位限制 - 单只股票建议仓位不超过15%
+止损铁律 - 所有信号必须给出止损价
+回撤保护 - 当日亏损达5%立即停止新开仓
+环境过滤 - 大盘跌幅>2%时，所有信号降级
+用户输入格式 (User Prompt Template)
+Markdown
+## 待分析股票
+
+**{{. Name}} ({{.Code}})** - {{.Market}} - {{.Industry}}
+
+---
+
+## 实时数据 ({{.Timestamp}})
+
+### 📊 基础行情
+- **当前价格**: {{.Price}} 元
+- **今日涨跌**: {{.Change}}% {{if gt .Change 0}}📈{{else if lt .Change 0}}📉{{else}}➡️{{end}}
+- **成交额**: {{.Amount | formatYi}} 亿元
+- **量比**: {{.VolumeRatio}}
+- **换手率**: {{. TurnoverRate}}%
+- **振幅**: {{.Amplitude}}%
+
+---
+
+### 💰 资金流向 (核心！)
+
+| 类型 | 净流入 | 占比 |
+|------|--------|------|
+| **主力净流入** | {{.MainNetInflow | formatWan}} 万 | {{.MainRatio}}% |
+| 超大单净流入 | {{.SuperNetInflow | formatWan}} 万 | {{.SuperRatio}}% |
+| 大单净流入 | {{.BigNetInflow | formatWan}} 万 | {{.BigRatio}}% |
+| 中单净流入 | {{. MiddleNetInflow | formatWan}} 万 | {{.MiddleRatio}}% |
+| 小单净流入 | {{.SmallNetInflow | formatWan}} 万 | {{.SmallRatio}}% |
+
+- **连续资金流入**: {{.ConsecutiveInflows}} 天
+- **资金流入强度**: {{if gt .MainNetInflow 50000000}}🔥极强{{else if gt .MainNetInflow 20000000}}🔥强{{else if gt .MainNetInflow 0}}温和{{else}}❄️流出{{end}}
+
+{{if . FlowPriceDivergence}}
+⚠️ **量价背离警告**: 涨幅{{.Change}}% 但主力净流出{{.MainNetInflow | formatWan}}万
+{{end}}
+
+---
+
+### 📈 技术指标
+
+- **5日均线**: {{.MA5}} (当前价{{if gt .Price . MA5}}在上方{{else}}在下方{{end}})
+- **10日均线**: {{.MA10}}
+- **20日均线**:  {{.MA20}}
+- **均线
+排列**: {{if . MATrend}}{{.MATrend}}{{else}}待计算{{end}} - **相对前5日均量**: {{.VolumeVsAvg5}}% -
+排列**: {{if . MATrend}}{{.MATrend}}{{else}}待计算{{end}}
+
+相对前5日均量: {{.VolumeVsAvg5}}%
+MACD: DIF={{.MACD.DIF}}, DEA={{.MACD.DEA}}, MACD={{.MACD. MACD}}
+KDJ: K={{.KDJ.K}}, D={{.KDJ. D}}, J={{.KDJ.J}}
+RSI(14): {{.RSI}}
+技术形态: {{. TechnicalPattern}}
+
+💎 估值指标
+市盈率(PE-TTM): {{.PE}} {{if and (gt .PE 0) (lt .PE 30)}}✅合理{{else if gt .PE 80}}⚠️高估{{else if lt .PE 0}}❌亏损{{else}}适中{{end}}
+市净率(PB): {{.PB}}
+市盈率分位数: {{.PEPercentile}}% (近3年)
+总市值: {{.MarketCap | formatYi}} 亿 {{if gt .MarketCap 100000000000}}(超大盘){{else if gt .MarketCap 50000000000}}(大盘){{else if gt .MarketCap 10000000000}}(中盘){{else}}(小盘){{end}}
+流通市值: {{.CircCap | formatYi}} 亿
+流通比例: {{.CircRatio}}%
+🏛️ 龙虎榜数据 (机构行为)
+{{if .LHB}} ✅ 今日上榜 - 原因: {{.LHB.Reason}}
+
+资金情况:
+
+买入金额: {{.LHB. BuyAmount | formatWan}} 万
+卖出金额: {{.LHB.SellAmount | formatWan}} 万
+净买入: {{.LHB. NetAmount | formatWan}} 万 {{if gt .LHB.NetAmount 0}}📈{{else}}📉{{end}}
+机构席位:
+
+买入机构: {{.LHB. BuyOrgs}} 家
+卖出机构: {{.LHB.SellOrgs}} 家
+机构净流入: {{.LHB. OrgNetInflow | formatWan}} 万
+买入前五席位: {{range .LHB.TopBuyers}} {{. Rank}}. {{.Name}}: {{.BuyAmount | formatWan}}万 {{if . IsOrg}}[机构]{{else if .IsFamous}}[知名游资]{{else}}[普通]{{end}} {{end}}
+
+卖出前五席位: {{range .LHB.TopSellers}} {{.Rank}}. {{. Name}}: {{.SellAmount | formatWan}}万 {{if .IsOrg}}[机构]{{else if .IsFamous}}[知名游资]{{else}}[普通]{{end}} {{end}}
+
+{{else}} ⭕ 今日未上龙虎榜 {{end}}
+
+🔄 板块轮动
+{{if .SectorFlow}} 所属板块: {{.SectorFlow. SectorName}}
+
+指标	数值	说明
+板块排名	第{{.SectorFlow.Rank}}名 / 共{{.SectorFlow. Total}}个	{{if le .SectorFlow.Rank 3}}🔥龙头板块{{else if le .SectorFlow.Rank 10}}🔥热门板块{{else if le .SectorFlow.Rank 30}}温和{{else}}冷门{{end}}
+板块涨幅	{{.SectorFlow. ChangeRate}}%	{{if gt .SectorFlow. ChangeRate 3}}🚀{{else if gt .SectorFlow.ChangeRate 0}}📈{{else}}📉{{end}}
+板块资金流入	{{.SectorFlow.NetInflow	formatYi}} 亿
+板块内排名	第{{.SectorFlow.StockRank}}名 / 共{{.SectorFlow.StockTotal}}只	{{if le .SectorFlow.StockRank 5}}🌟板块龙头{{else if le .SectorFlow.StockRank 20}}跟随{{else}}弱势{{end}}
+连续上榜天数	{{.SectorFlow.ConsecutiveDays}} 天	{{if gt .SectorFlow.ConsecutiveDays 3}}⚠️持续性风险{{end}}
+板块地位: {{.SectorFlow.Position}}
+
+概念标签: {{range . Concepts}}{{.}} | {{end}}
+
+{{else}} ⭕ 无板块数据 {{end}}
+
+📰 市场环境
+指数表现:
+
+上证指数: {{.ShIndex. Point}} ({{.ShIndex.Change}}%) {{if gt .ShIndex.Change 0}}📈{{else}}📉{{end}}
+深证成指: {{.SzIndex.Point}} ({{. SzIndex.Change}}%)
+创业板指: {{.CybIndex.Point}} ({{.CybIndex.Change}}%)
+科创50: {{.KcIndex.Point}} ({{.KcIndex.Change}}%)
+市场情绪:
+
+上涨家数: {{.UpCount}} 家
+下跌家数: {{.DownCount}} 家
+涨跌比: {{.UpDownRatio}}
+涨停数: {{.LimitUpCount}} 家
+跌停数: {{.LimitDownCount}} 家
+市场情绪: {{if gt .ShIndex.Change 1}}🔥偏多{{else if lt .ShIndex.Change -1}}❄️偏空{{else}}➡️中性{{end}}
+📊 多因子预评分 (系统初步评估)
+{{range .PreScores}}
+
+{{.Name}} (权重{{.Weight}}%): {{.Score}}/100 - {{.Reason}} {{end}}
+综合预评分: {{.TotalPreScore}}/100
+
+分析要求
+请严格按照 CAMP-I 五维度模型 进行分析：
+
+Capital Flow (资金面) - 权重30%
+主力资金流向与持续性
+是否存在量价背离陷阱
+Action (技术面) - 权重25%
+量价配合度
+均线系统与趋势
+价格位置（支撑/压力）
+Margin (估值面) - 权重20%
+PE/PB估值合理性
+市值与流动性
+安全边际
+Plate (板块轮动) - 权重15%
+板块强度与排名
+板块龙头地位
+主题持续性
+Institution (机构行为) - 权重10%
+龙虎榜机构动向
+游资行为分析
+北向资金参与
+必须检测风险:
+
+⚠️ 诱多陷阱 (涨+资金出逃+高换手)
+⚠️ 高位接力风险 (连续涨停)
+⚠️ 妖股特征 (换手>30% + 全游资)
+⚠️ 流动性陷阱 (小市值+低价)
+⚠️ 大盘环境恶劣
+请给出明确信号并严格按照JSON格式输出。
+
+Code
+
+---
+
+## 🛡️ Risk Management System (风控系统)
+
+### Risk Control Architecture (风控架构)
+
+```yaml
+# ===== configs/risk. yaml =====
+
+risk_management:
+  version: "3.0"
+  description: "多层次风控体系"
+  
+  # ═══════════════════════════════════════════════════════════════════
+  # Level 1: 信号级风控 (Signal-Level Risk Control)
+  # ═══════════════════════════════════════════════════════════════════
+  signal_level: 
+    # 置信度阈值
+    min_confidence: 0.60              # 最低置信度60%
+    
+    # 一票否决条件
+    veto_conditions:
+      - name: "诱多陷阱"
+        condition: "change > 3 AND main_net_inflow < -10000000 AND turnover_rate > 15"
+        action: "REJECT"
+        reason: "量价背离，诱多陷阱"
+        
+      - name: "低价股风险"
+        condition: "price < 3"
+        action: "REJECT"
+        reason: "股价过低，退市风险"
+        
+      - name: "亏损小盘股"
+        condition: "pe < 0 AND market_cap < 5000000000"
+        action:  "REJECT"
+        reason:  "亏损+小市值，风险过高"
+        
+      - name:  "机构集体撤退"
+        condition: "lhb_sell_orgs >= 3 AND lhb_buy_orgs == 0"
+        action: "REJECT"
+        reason: "机构集体卖出"
+        
+      - name: "换手率异常"
+        condition: "turnover_rate > 30"
+        action: "REJECT"
+        reason: "换手率过高，投机过度"
+    
+    # 信号降级条件
+    downgrade_conditions:
+      - name: "大盘环境恶劣"
+        condition: "sh_index_change < -2 AND limit_down_count > limit_up_count * 2"
+        action: "DOWNGRADE"
+        mapping:
+          STRONG_BUY: "BUY"
+          BUY: "WATCH"
+          WATCH: "AVOID"
+          
+      - name: "短期涨幅过大"
+        condition:  "change_5d > 20"
+        action: "DOWNGRADE"
+        reason: "短期涨幅过大，追高风险"
+        
+  # ═══════════════════════════════════════════════════════════════════
+  # Level 2: 仓位级风控 (Position-Level Risk Control)
+  # ═══════════════════════════════════════════════════════════════════
+  position_level:
+    # 单票仓位限制
+    single_stock: 
+      max_pct:  0.15                   # 单股最大仓位15%
+      strong_buy_pct: 0.10            # 强买入建议10%
+      buy_pct: 0.05                   # 买入建议5%
+      
+    # 板块仓位限制
+    sector: 
+      max_pct: 0.30                   # 单板块最大30%
+      related_sector_max:  0.50        # 相关板块合计50%
+      
+    # 总仓位限制
+    total: 
+      max_pct: 0.85                   # 最大总仓位85%
+      min_cash_reserve: 0.15          # 最低现金储备15%
+      
+    # 动态仓位调整
+    dynamic_adjustment:
+      # 大盘强势时加仓
+      bull_market: 
+        condition: "sh_index_change_20d > 5 AND up_down_ratio > 2"
+        max_total_pct: 0.90
+        
+      # 大盘弱势时减仓
+      bear_market: 
+        condition: "sh_index_change_20d < -5 AND up_down_ratio < 0.5"
+        max_total_pct: 0.50
+        
+  # ═══════════════════════════════════════════════════════════════════
+  # Level 3: 账户级风控 (Account-Level Risk Control)
+  # ═══════════════════════════════════════════════════════════════════
+  account_level: 
+    # 日内限制
+    daily: 
+      max_loss: 50000                 # 日最大亏损5万
+      max_loss_pct: 0.05              # 日最大亏损率5%
+      max_trades: 10                  # 日最大交易笔数10
+      max_new_positions: 5            # 日最大新开仓5笔
+      
+    # 周/月限制
+    periodic:
+      weekly_max_loss_pct: 0.10       # 周最大亏损率10%
+      monthly_max_loss_pct: 0.20      # 月最大亏损率20%
+      
+    # 连续亏损限制
+    loss_streak:
+      max_consecutive_losses: 3       # 最大连续亏损3次
+      cooldown_minutes: 60            # 冷却时间60分钟
+      
+    # 回撤控制
+    drawdown:
+      max_drawdown_pct:  0.20          # 最大回撤20%
+      alert_drawdown_pct: 0.10        # 回撤预警10%
+      stop_trading_drawdown:  0.15     # 回撤15%停止交易
+      
+  # ═══════════════════════════════════════════════════════════════════
+  # Level 4: 止损止盈 (Stop Loss & Take Profit)
+  # ═══════════════════════════════════════════════════════════════════
+  sl_tp: 
+    # 止损策略
+    stop_loss: 
+      # 固定止损
+      fixed: 
+        low_risk:  0.03                # 低风险3%
+        medium_risk: 0.05             # 中风险5%
+        high_risk: 0.08               # 高风险8%
+        
+      # 移动止损 (Trailing Stop)
+      trailing:
+        enabled: true
+        trigger_profit: 0.10          # 盈利10%启动
+        trailing_pct: 0.05            # 回撤5%止损
+        
+      # 时间止损
+      time_based:
+        enabled: true
+        max_holding_days: 30          # 最长持有30天
+        force_exit_loss_pct: 0.03     # 超期且亏损>3%强制退出
+        
+    # 止盈策略
+    take_profit:
+      # 分批止盈
+      partial:
+        enabled: true
+        stages: 
+          - profit_pct: 0.10          # 盈利10%
+            sell_pct: 0.30            # 卖出30%
+          - profit_pct: 0.15          # 盈利15%
+            sell_pct: 0.30            # 再卖30%
+          - profit_pct: 0.25          # 盈利25%
+            sell_pct: 1.00            # 全部卖出
+            
+      # 目标止盈
+      target: 
+        low_risk: 0.10                # 低风险10%
+        medium_risk: 0.15             # 中风险15%
+        high_risk:  0.20               # 高风险20%
+        
+  # ═══════════════════════════════════════════════════════════════════
+  # Level 5: 熔断机制 (Circuit Breaker)
+  # ═══════════════════════════════════════════════════════════════════
+  circuit_breaker:
+    # 触发条件
+    triggers:
+      - name: "日亏损达限"
+        condition: "daily_loss >= max_daily_loss"
+        action: "HALT_ALL"
+        duration_minutes: 1440        # 停止24小时
+        
+      - name: "回撤超阈值"
+        condition: "drawdown >= stop_trading_drawdown"
+        action:  "HALT_NEW"            # 停止新开仓
+        duration_minutes: 720         # 停止12小时
+        
+      - name:  "连续亏损"
+        condition: "consecutive_losses >= max_consecutive_losses"
+        action: "HALT_NEW"
+        duration_minutes: 60
+        
+      - name: "市场熔断"
+        condition: "market_halted"
+        action: "HALT_ALL"
+        
+      - name: "AI服务异常"
+        condition: "ai_error_rate > 0.5"
+        action: "DEGRADE_AI"          # 降级到规则引擎
+        
+    # 恢复条件
+    recovery: 
+      manual_override:  true           # 允许手动恢复
+      auto_recovery: false            # 不自动恢复
+      
+  # ═══════════════════════════════════════════════════════════════════
+  # Level 6: 市场环境过滤 (Market Environment Filter)
+  # ═══════════════════════════════════════════════════════════════════
+  market_filter:
+    # 不开新仓条件
+    no_new_position:
+      - name: "大盘暴跌"
+        condition:  "sh_index_change < -3"
+        
+      - name: "市场恐慌"
+        condition: "limit_down_count > limit_up_count * 3"
+        
+      - name:  "成交量萎缩"
+        condition:  "market_volume < avg_volume_20d * 0.7"
+        
+      - name:  "上涨家数过少"
+        condition: "up_ratio < 0.30"
+        
+    # 只做T+0条件
+    intraday_only:
+      condition: "volatility_index > 30"  # 波动率过高
+      
+  # ═══════════════════════════════════════════════════════════════════
+  # 告警配置 (Alerting)
+  # ═══════════════════════════════════════════════════════════════════
+  alerting:
+    channels:
+      - type: "webhook"
+        url: "${ALERT_WEBHOOK_URL}"
+        level: ["ERROR", "CRITICAL"]
+        
+      - type:  "sms"
+        phone: "${ALERT_PHONE}"
+        level: ["CRITICAL"]
+        
+      - type:  "email"
+        to: "${ALERT_EMAIL}"
+        level: ["WARNING", "ERROR", "CRITICAL"]
+        
+    rules:
+      - name: "日亏损预警"
+        condition: "daily_loss > max_daily_loss * 0.8"
+        level: "WARNING"
+        message: "日亏损已达限额的80%"
+        
+      - name: "回撤预警"
+        condition: "drawdown > alert_drawdown_pct"
+        level: "WARNING"
+        message: "回撤超过{{.Drawdown}}%"
+        
+      - name: "熔断触发"
+        condition: "circuit_breaker_triggered"
+        level: "CRITICAL"
+        message: "风控熔断触发:  {{.Reason}}"
+        
+      - name: "AI成本超限"
+        condition: "daily_ai_cost > max_daily_ai_cost * 0.9"
+        level: "WARNING"
+        message: "AI调用成本接近上限"
+⚙️ Configuration Management (配置管理)
+Complete Configuration Schema (完整配置结构)
+Go
+// ===== internal/config/config.go =====
+
+type Config struct {
+    App           AppConfig           `yaml:"app"`
+    DataSource    DataSourceConfig    `yaml:"datasource"`
+    AI            AIConfig            `yaml:"ai"`
+    Strategy      StrategyConfig      `yaml:"strategy"`
+    Risk          RiskConfig          `yaml:"risk"`
+    Pipeline      PipelineConfig      `yaml:"pipeline"`
+    Sink          SinkConfig          `yaml:"sink"`
+    Storage       StorageConfig       `yaml:"storage"`
+    Observability ObservabilityConfig `yaml:"observability"`
+    API           APIConfig           `yaml:"api"`
+}
+
+type AppConfig struct {
+    Name             string        `yaml:"name"`
+    Environment      string        `yaml:"environment"`      // dev/staging/prod
+    Version          string        `yaml:"version"`
+    LogLevel         string        `yaml:"log_level"`
+    GracefulShutdown time.Duration `yaml:"graceful_shutdown"`
+    WorkingHours     WorkingHours  `yaml:"working_hours"`
+}
+
+type WorkingHours struct {
+    Enabled   bool   `yaml:"enabled"`
+    Start     string `yaml:"start"`      // "09:30"
+    End       string `yaml:"end"`        // "15:00"
+    Timezone  string `yaml:"timezone"`   // "Asia/Shanghai"
+    PreMarket bool   `yaml:"pre_market"` // 盘前扫描
+}
+
+type DataSourceConfig struct {
+    Primary   []SourceConfig  `yaml:"primary"`
+    Fallback  []SourceConfig  `yaml:"fallback"`
+    ScanScope int             `yaml:"scan_scope"`
+    Cache     CacheConfig     `yaml:"cache"`
+    Retry     RetryConfig     `yaml:"retry"`
+}
+
+type SourceConfig struct {
+    Name     string        `yaml:"name"`
+    Type     string        `yaml:"type"`         // eastmoney/sina/tonghuashun
+    BaseURL  string        `yaml:"base_url"`
+    Timeout  time.Duration `yaml:"timeout"`
+    Priority int           `yaml:"priority"`
+    Enabled  bool          `yaml:"enabled"`
+    RateLimit RateLimitConfig `yaml:"rate_limit"`
+}
+
+type AIConfig struct {
+    Provider       string              `yaml:"provider"`
+    BaseURL        string              `yaml:"base_url"`
+    APIKey         string              `yaml:"api_key"`
+    Model          string              `yaml:"model"`
+    Timeout        time.Duration       `yaml:"timeout"`
+    MaxTokens      int                 `yaml:"max_tokens"`
+    Temperature    float64             `yaml:"temperature"`
+    TopP           float64             `yaml:"top_p"`
+    RateLimit      RateLimitConfig     `yaml:"rate_limit"`
+    CircuitBreaker BreakerConfig       `yaml:"circuit_breaker"`
+    CostControl    CostControlConfig   `yaml:"cost_control"`
+    Fallback       AIFallbackConfig    `yaml:"fallback"`
+}
+
+type AIFallbackConfig struct {
+    Enabled       bool   `yaml:"enabled"`
+    Mode          string `yaml:"mode"`          // rule_engine/cache/none
+    CacheTTL      time.Duration `yaml:"cache_ttl"`
+    SimilarityThreshold float64 `yaml:"similarity_threshold"`
+}
+
+type CostControlConfig struct {
+    MaxDailySpend      float64 `yaml:"max_daily_spend"`
+    AlertThreshold     float64 `yaml:"alert_threshold"`
+    PricePerKTokens    float64 `yaml:"price_per_k_tokens"`
+    InputTokenPrice    float64 `yaml:"input_token_price"`
+    OutputTokenPrice   float64 `yaml:"output_token_price"`
+}
+
+type StrategyConfig struct {
+    Name    string              `yaml:"name"`
+    Version string              `yaml:"version"`
+    Filters FilterConfig        `yaml:"filters"`
+    Scoring ScoringConfig       `yaml:"scoring"`
+    Factors []FactorConfig      `yaml:"factors"`
+    Dedup   DedupConfig         `yaml:"dedup"`
+}
+
+type FilterConfig struct {
+    // 资金面
+    MainFlowMin      float64 `yaml:"main_flow_min"`
+    MainFlowDays     int     `yaml:"main_flow_days"`
+    
+    // 技术面
+    TurnoverMin      float64 `yaml:"turnover_min"`
+    TurnoverMax      float64 `yaml:"turnover_max"`
+    VolumeRatioMin   float64 `yaml:"volume_ratio_min"`
+    VolumeRatioMax   float64 `yaml:"volume_ratio_max"`
+    
+    // 估值面
+    PEMin            float64 `yaml:"pe_min"`
+    PEMax            float64 `yaml:"pe_max"`
+    PBMax            float64 `yaml:"pb_max"`
+    
+    // 风控面
+    MarketCapMin     float64 `yaml:"market_cap_min"`
+    PriceMin         float64 `yaml:"price_min"`
+    PriceMax         float64 `yaml:"price_max"`
+    ChangeMin        float64 `yaml:"change_min"`
+    ChangeMax        float64 `yaml:"change_max"`
+}
+
+type ScoringConfig struct {
+    StrongBuyThreshold int `yaml:"strong_buy_threshold"`
+    BuyThreshold       int `yaml:"buy_threshold"`
+    WatchThreshold     int `yaml:"watch_threshold"`
+}
+
+type FactorConfig struct {
+    Name        string               `yaml:"name"`
+    Weight      float64              `yaml:"weight"`
+    SubFactors  []SubFactorConfig    `yaml:"sub_factors"`
+}
+
+type SubFactorConfig struct {
+    Name    string  `yaml:"name"`
+    Weight  float64 `yaml:"weight"`
+    Scoring []ScoringRule `yaml:"scoring"`
+}
+
+type ScoringRule struct {
+    Condition string `yaml:"condition"`
+    Score     int    `yaml:"score"`
+    Reason    string `yaml:"reason"`
+    Alert     string `yaml:"alert"`
+}
+
+type RiskConfig struct {
+    SignalLevel   SignalRiskConfig   `yaml:"signal_level"`
+    PositionLevel PositionRiskConfig `yaml:"position_level"`
+    AccountLevel  AccountRiskConfig  `yaml:"account_level"`
+    SLTP          SLTPConfig         `yaml:"sl_tp"`
+    CircuitBreaker CircuitBreakerConfig `yaml:"circuit_breaker"`
+    MarketFilter  MarketFilterConfig `yaml:"market_filter"`
+    Alerting      AlertingConfig     `yaml:"alerting"`
+}
+
+type PipelineConfig struct {
+    Workers        int           `yaml:"workers"`
+    BatchSize      int           `yaml:"batch_size"`
+    BufferSize     int           `yaml:"buffer_size"`
+    ScanInterval   time.Duration `yaml:"scan_interval"`
+    Timeout        time.Duration `yaml:"timeout"`
+    EnableProfiling bool         `yaml:"enable_profiling"`
+}
+
+type SinkConfig struct {
+    Stdout    bool              `yaml:"stdout"`
+    JSONFile  JSONFileConfig    `yaml:"json_file"`
+    Webhook   WebhookConfig     `yaml:"webhook"`
+    Kafka     KafkaConfig       `yaml:"kafka"`
+    WebSocket WebSocketConfig   `yaml:"websocket"`
+    Database  DatabaseConfig    `yaml:"database"`
+}
+
+type StorageConfig struct {
+    TimescaleDB TimescaleDBConfig `yaml:"timescaledb"`
+    Redis       RedisConfig       `yaml:"redis"`
+    LocalCache  LocalCacheConfig  `yaml:"local_cache"`
+}
+
+type ObservabilityConfig struct {
+    Metrics   MetricsConfig   `yaml:"metrics"`
+    Tracing   TracingConfig   `yaml:"tracing"`
+    Logging   LoggingConfig   `yaml:"logging"`
+    Profiling ProfilingConfig `yaml:"profiling"`
+}
+
+type APIConfig struct {
+    Enabled bool   `yaml:"enabled"`
+    Host    string `yaml:"host"`
+    Port    int    `yaml:"port"`
+    TLS     TLSConfig `yaml:"tls"`
+    Auth    AuthConfig `yaml:"auth"`
+    CORS    CORSConfig `yaml:"cors"`
+}
+Production Configuration Example (生产配置示例)
+YAML
+# ===== configs/config.prod.yaml =====
+
+app:
+  name: "alpha-detector"
+  environment: "production"
+  version: "4.0.0"
+  log_level: "info"
+  graceful_shutdown: 30s
+  working_hours: 
+    enabled: true
+    start: "09:15"              # 提前15分钟启动
+    end: "15:15"                # 延后15分钟
+    timezone: "Asia/Shanghai"
+    pre_market: true            # 盘前扫描
+
+datasource:
+  primary: 
+    - name: "eastmoney-main"
+      type: "eastmoney"
+      base_url:  "https://push2.eastmoney.com"
+      timeout: 5s
+      priority: 1
+      enabled: true
+      rate_limit: 
+        requests_per_second: 10
+        burst:  20
+        
+  fallback:
+    - name:  "sina-backup"
+      type: "sina"
+      base_url: "https://hq.sinajs.cn"
+      timeout: 5s
+      priority: 2
+      enabled: true
+      
+    - name: "tonghuashun-backup"
+      type: "tonghuashun"
+      base_url: "http://data.10jqka.com.cn"
+      timeout: 5s
+      priority: 3
+      enabled: true
+      
+  scan_scope: 200               # 扫描活跃度前200
+  
+  cache:
+    enabled: true
+    provider: "redis"
+    ttl: 30s
+    
+  retry: 
+    max_attempts: 3
+    initial_interval: 1s
+    max_interval: 10s
+    multiplier: 2.0
+    jitter_factor: 0.1
+
+ai:
+  provider: "kimi"
+  base_url: "https://api.moonshot.cn/v1"
+  api_key: "${ALPHA_KIMI_API_KEY}"
+  model: "moonshot-v1-8k"
+  timeout: 30s
+  max_tokens: 1500
+  temperature: 0.3
+  top_p: 0.9
+  
+  rate_limit:
+    requests_per_minute: 30
+    tokens_per_minute: 100000
+    burst: 5
+    
+  circuit_breaker:
+    failure_threshold: 5
+    success_threshold: 3
+    timeout: 60s
+    half_open_max_requests: 3
+    
+  cost_control:
+    max_daily_spend: 100.0
+    alert_threshold: 80.0
+    input_token_price: 0.012      # ¥12/百万tokens
+    output_token_price:  0.012
+    
+  fallback:
+    enabled: true
+    mode: "rule_engine"           # AI失败时降级到规则引擎
+    cache_ttl: 2h
+    similarity_threshold: 0.1     # 数据变化<10%使用缓存
+
+strategy:
+  name: "CAMP-I Multi-Factor"
+  version: "2.0"
+  
+  filters:
+    # 资金面
+    main_flow_min: 20000000       # 2000万
+    main_flow_days: 2
+    
+    # 技术面
+    turnover_min:  3. 0
+    turnover_max: 25.0
+    volume_ratio_min: 1.2
+    volume_ratio_max:  10.0
+    
+    # 估值面
+    pe_min: 0
+    pe_max: 80
+    pb_max: 10
+    
+    # 风控面
+    market_cap_min: 5000000000    # 50亿
+    price_min:  5.0
+    price_max: 300.0
+    change_min: -5.0
+    change_max: 9.0               # 不追涨停
+    
+  scoring:
+    strong_buy_threshold: 85
+    buy_threshold: 75
+    watch_threshold: 60
+    
+  dedup:
+    enabled: true
+    window:  4h
+    key_fields: ["code"]
+
+risk:
+  signal_level: 
+    min_confidence: 0.60
+    
+  position_level:
+    single_stock: 
+      max_pct:  0.15
+      strong_buy_pct: 0.10
+      buy_pct: 0.05
+    sector: 
+      max_pct: 0.30
+    total: 
+      max_pct: 0.85
+      
+  account_level:
+    daily: 
+      max_loss: 50000
+      max_loss_pct: 0.05
+      max_trades: 10
+      
+    drawdown:
+      max_drawdown_pct: 0.20
+      alert_drawdown_pct: 0.10
+      stop_trading_drawdown:  0.15
+      
+  sl_tp:
+    stop_loss: 
+      fixed: 
+        low_risk: 0.03
+        medium_risk: 0.05
+        high_risk: 0.08
+      trailing:
+        enabled: true
+        trigger_profit: 0.10
+        trailing_pct: 0.05
+        
+    take_profit:
+      partial:
+        enabled: true
+        stages: 
+          - profit_pct: 0.10
+            sell_pct: 0.30
+          - profit_pct: 0.15
+            sell_pct: 0.30
+          - profit_pct:  0.25
+            sell_pct: 1.00
+
+pipeline:
+  workers: 5
+  batch_size: 20
+  buffer_size: 100
+  scan_interval: 5m
+  timeout: 60s
+  enable_profiling:  false
+
+sink:
+  stdout: true
+  
+  json_file:
+    enabled: true
+    path: "/app/logs/signals"
+    rotation:  "daily"
+    max_age_days: 90
+    compress: true
+    
+  webhook: 
+    enabled: true
+    urls:
+      - "${ALPHA_DINGTALK_WEBHOOK}"
+      - "${ALPHA_FEISHU_WEBHOOK}"
+    timeout: 10s
+    retry_max:  3
+    batch_size: 1
+    
+  kafka:
+    enabled: false
+    brokers: ["kafka: 9092"]
+    topic: "alpha-signals"
+    
+  websocket:
+    enabled: true
+    port: 8080
+    path: "/ws/signals"
+    
+  database: 
+    enabled: true
+    type: "timescaledb"
+
+storage:
+  timescaledb: 
+    host: "${DB_HOST}"
+    port: 5432
+    database: "alpha_detector"
+    username: "${DB_USER}"
+    password:  "${DB_PASSWORD}"
+    max_connections: 20
+    
+  redis:
+    addr: "${REDIS_ADDR}"
+    password: "${REDIS_PASSWORD}"
+    db: 0
+    max_retries: 3
+    
+  local_cache:
+    enabled: true
+    max_size_mb: 256
+    ttl:  30m
+
+observability:
+  metrics: 
+    enabled: true
+    port:  9090
+    path: "/metrics"
+    
+  tracing: 
+    enabled: true
+    sample_rate: 0.1            # 10%采样
+    
+  logging:
+    format: "json"
+    output: "stdout"
+    level:  "info"
+    
+  profiling:
+    enabled: false
+    port: 6060
+
+api:
+  enabled: true
+  host: "0.0.0.0"
+  port: 8888
+  tls:
+    enabled: false
+  auth:
+    enabled: true
+    type: "jwt"
+    secret:  "${API_JWT_SECRET}"
+  cors:
+    enabled: true
+    allowed_origins:  ["*"]
+📦 Dependencies (完整依赖)
+Go
+// ===== go.mod =====
+
+module github.com/yourorg/alpha-detector
+
+go 1.22
+
+require (
+    // ═══════════════════════════════════════
+    // Core Dependencies
+    // ═══════════════════════════════════════
+    
+    // HTTP & API
+    github.com/go-resty/resty/v2 v2.11.0
+    github.com/gin-gonic/gin v1.9.1           // REST API框架
+    google.golang.org/grpc v1.60.1            // gRPC支持
+    google.golang.org/protobuf v1.32.0
+    
+    // 配置管理
+    github.com/spf13/viper v1.18.2
+    github.com/spf13/cobra v1.8.0             // CLI框架
+    gopkg.in/yaml.v3 v3.0.1
+    
+    // 日志
+    // log/slog - Go 1.21+ built-in
+    
+    // 数据库
+    github.com/jackc/pgx/v5 v5.5.1            // PostgreSQL/TimescaleDB
+    github.com/redis/go-redis/v9 v9.4.0       // Redis
+    gorm.io/gorm v1.25.5                      // ORM (可选)
+    gorm.io/driver/postgres v1.5.4
+    
+    // 消息队列
+    github.com/segmentio/kafka-go v0.4.47     // Kafka
+    
+    // 指标监控
+    github.com/prometheus/client_golang v1.18.0
+    
+    // 并发控制
+    golang.org/x/sync v0.6.0                  // errgroup, singleflight
+    
+    // 精确计算
+    github.com/shopspring/decimal v1.3.1
+    
+    // 依赖注入
+    github. com/google/wire v0.6.0
+    
+    // UUID
+    github.com/google/uuid v1.6.0
+    
+    // 缓存
+    github.com/allegro/bigcache/v3 v3.1.0
+    github.com/patrickmn/go-cache v2.1.0+incompatible
+    
+    // JSON处理
+    github.com/tidwall/gjson v1.17.0          // 快速JSON解析
+    github.com/json-iterator/go v1.1.12       // 高性能JSON
+    
+    // 时间处理
+    github.com/jinzhu/now v1.1.5
+    
+    // 工具库
+    github.com/samber/lo v1.39.0              // 函数式工具
+    github.com/duke-git/lancet/v2 v2.3.0      // 工具函数集
+    
+    // 验证
+    github.com/go-playground/validator/v10 v10.16.0
+    
+    // 限流 & 熔断
+    golang.org/x/time v0.5.0                  // rate limiter
+    github.com/sony/gobreaker v0.5.0          // circuit breaker
+    
+    // WebSocket
+    github.com/gorilla/websocket v1.5.1
+    
+    // 测试
+    github.com/stretchr/testify v1.8.4
+    go.uber.org/mock v0.4.0
+    github.com/DATA-DOG/go-sqlmock v1.5.2
+    
+    // 其他
+    github.com/joho/godotenv v1.5.1           // . env文件加载
+)
+
+require (
+    // Indirect dependencies... 
+)
+🚀 Quick Start Guide (快速开始)
+bash
+# ═══════════════════════════════════════════════════════════════════
+# 1. 环境准备
+# ═══════════════════════════════════════════════════════════════════
+
+# 克隆仓库
+git clone https://github.com/yourorg/alpha-detector.git
+cd alpha-detector
+
+# 复制环境变量
+cp .env.example . env
+
+# 编辑 .env 文件，设置必要的密钥
+vim .env
+# 必填项: 
+# ALPHA_KIMI_API_KEY=your-kimi-api-key-here
+
+# ═══════════════════════════════════════════════════════════════════
+# 2. 本地开发
+# ═══════════════════════════════════════════════════════════════════
+
+# 安装依赖
+go mod tidy
+
+# 生成依赖注入代码
+make wire
+
+# 运行单元测试
+make test
+
+# 启动应用 (开发模式)
+make run
+
+# 或直接运行
+go run cmd/alpha/main.go --config configs/config.yaml
+
+# ═══════════════════════════════════════════════════════════════════
+# 3. Docker部署
+# ═══════════════════════════════════════════════════════════════════
+
+# 构建镜像
+make docker-build
+
+# 启动完整服务栈 (包括Redis, TimescaleDB, Prometheus, Grafana)
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f alpha-detector
+
+# 停止服务
+docker-compose down
+
+# ═══════════════════════════════════════════════════════════════════
+# 4. 生产部署 (Kubernetes)
+# ═══════════════════════════════════════════════════════════════════
+
+# 创建命名空间
+kubectl create namespace alpha-detector
+
+# 创建Secret (存放敏感信息)
+kubectl create secret generic alpha-secrets \
+  --from-literal=kimi-api-key=your-key \
+  --from-literal=db-password=your-password \
+  -n alpha-detector
+
+# 应用配置
+kubectl apply -f deployments/kubernetes/ -n alpha-detector
+
+# 查看状态
+kubectl get pods -n alpha-detector
+
+# 查看日志
+kubectl logs -f deployment/alpha-detector -n alpha-detector
+
+# ═══════════════════════════════════════════════════════════════════
+# 5. 监控 & 可视化
+# ═══════════════════════════════════════════════════════════════════
+
+# 访问Prometheus (指标)
+open http://localhost:9091
+
+# 访问Grafana (Dashboard)
+open http://localhost:3000
+# 默认账号:  admin / admin
+
+# 访问API (查询信号)
+curl http://localhost:8888/api/v1/signals | jq
+
+# ═══════════════════════════════════════════════════════════════════
+# 6. 回测验证
+# ═══════════════════════════════════════════════════════════════════
+
+# 运行回测 (2024年数据)
+make backtest START=2024-01-01 END=2024-12-31
+
+# 生成回测报告
+go run cmd/backtest/main.go \
+  --start 2024-01-01 \
+  --end 2024-12-31 \
+  --output backtest_report.html
+
+# ═══════════════════════════════════════════════════════════════════
+# 7. 性能测试
+# ═══════════════════════════════════════════════════════════════════
+
+# 基准测试
+make benchmark
+
+# 压力测试 (模拟1000个并发请求)
+go test -bench=. -benchmem -cpuprofile=cpu.prof ./...
+
+# 查看性能剖析
+go tool pprof cpu.prof
+✅ Deliverables Checklist (交付清单)
+已完成 ✅
+ Domain Layer (领域层)
+
+ Entity (Stock, Signal, Position, Portfolio)
+ Value Object (Money, Percentage, SignalType)
+ Repository Interface
+ Domain Service Interface
+ Application Layer (应用层)
+
+ Use Cases (ScanMarket, AnalyzeStock)
+ Pipeline Orchestrator
+ Multi-Factor Scorer (CAMP-I Model)
+ Risk Controller
+ Infrastructure Layer (基础设施层)
+
+ EastMoney Gateway
+ Sina Gateway
+ Kimi AI Oracle (完整Prompt工程)
+ TimescaleDB Repository
+ Redis Cache
+ Resilience Components (韧性组件)
+
+ Token Bucket Rate Limiter
+ Circuit Breaker
+ Exponential Backoff + Jitter Retry
+ Observability (可观测性)
+
+ TraceID全链路追踪
+ Prometheus Metrics
+ Structured Logging (slog)
+ Cost Tracker
+ Multi-Channel Sink (多通道输出)
+
+ Console (Stdout)
+ JSON File
+ Webhook (钉钉/飞书)
+ Kafka
+ WebSocket
+ Configuration (配置)
+
+ YAML配置文件
+ 环境变量覆盖
+ 策略热加载
+ Deployment (部署)
+
+ Dockerfile
+ Docker Compose
+ Kubernetes Manifests
+ Makefile自动化
+ Documentation (文档)
+
+ Architecture Design
+ API Documentation
+ Runbook
+待完成 ⏳
+ Web Dashboard (Web面板)
+
+ 实时信号展示
+ 回测可视化
+ 持仓管理
+ Backtesting Framework (回测框架)
+
+ 历史数据回放
+ 策略验证
+ 报告生成
+ Broker Integration (券商对接)
+
+ 东方财富API
+ 同花顺API
+ 模拟交易
+ Advanced Features (高级功能)
+
+ 机器学习因子
+ 情绪分析
+ 事件驱动
+ Unit Tests (单元测试)
+
+ 覆盖率 > 80%
+ Mock所有外部依赖
+🎓 Best Practices (最佳实践)
+Code Quality Standards (代码质量标准)
+Go
+// ✅ CORRECT:  错误包装，保留调用栈
+if err := client. Fetch(ctx); err != nil {
+    return fmt.Errorf("fetch market data from %s: %w", source, err)
+}
+
+// ❌ WRONG: 裸panic
+if data == nil {
+    panic("data is nil")
+}
+
+// ✅ CORRECT: Context检查，毫秒级退出
+for _, stock := range stocks {
+    select {
+    case <-ctx. Done():
+        return ctx. Err()
+    default:
+    }
+    process(stock)
+}
+
+// ✅ CORRECT: 注释解释"Why"而非"What"
+// 使用buffered channel容量为workers*2，是为了在下游AI限流期间
+// 给上游fetcher提供缓冲空间，避免整个pipeline阻塞
+dataCh := make(chan *Stock, workers*2)
+
+// ❌ WRONG: 只说"What"
+// 创建一个容量为workers*2的channel
+dataCh := make(chan *Stock, workers*2)
+🚀 Let's build a sustainable money-printing machine for A-share market! 💰
+
+📄 License
+MIT License - See LICENSE file for details.
+ ## 📋 Implementation Guide (实现指南) ### Phase 1:
+📋 Implementation Guide (实现指南)
+Phase 1: Foundation (基础阶段 - Week 1-2)
+bash
+# ═══════════════════════════════════════════════════════════════════
+# Sprint 1.1: 项目脚手架搭建
+# ═══════════════════════════════════════════════════════════════════
+
+# 1. 初始化项目结构
+mkdir -p alpha-detector/{cmd,internal,pkg,configs,deployments,test,docs}
+cd alpha-detector
+go mod init github.com/yourorg/alpha-detector
+
+# 2. 创建核心目录
+mkdir -p internal/{domain,application,infrastructure,interfaces,config,observability}
+mkdir -p internal/domain/{entity,valueobject,aggregate,repository,service,event}
+mkdir -p pkg/{ratelimit,circuitbreaker,retry,cache,errors,util}
+
+# 3. 安装核心依赖
+go get github.com/spf13/viper
+go get github.com/spf13/cobra
+go get github.com/shopspring/decimal
+go get github. com/google/wire/cmd/wire
+go get github. com/prometheus/client_golang/prometheus
+go get golang.org/x/sync/errgroup
+
+# ═══════════════════════════════════════════════════════════════════
+# Sprint 1.2: Domain Layer实现
+# ═══════════════════════════════════════════════════════════════════
+Domain Layer Implementation
+Go
+// ===== internal/domain/entity/stock.go =====
+
+package entity
+
+import (
+    "time"
+    "github. com/shopspring/decimal"
+)
+
+// Stock 股票实体
+type Stock struct {
+    // 基础信息
+    Code      string    `json:"code"`       // 股票代码
+    Name      string    `json:"name"`       // 股票名称
+    Market    string    `json:"market"`     // SH/SZ
+    Industry  string    `json:"industry"`   // 所属行业
+    
+    // 行情数据
+    Price     decimal. Decimal `json:"price"`
+    Change    decimal.Decimal `json:"change"`
+    Volume    int64           `json:"volume"`
+    Amount    decimal.Decimal `json:"amount"`
+    
+    // 聚合数据
+    Capital   CapitalFlow   `json:"capital"`
+    Technical Technical     `json:"technical"`
+    Valuation Valuation     `json:"valuation"`
+    Sector    Sector        `json:"sector"`
+    LHB       *LHBData      `json:"lhb,omitempty"`
+    
+    // 元数据
+    Timestamp time. Time `json:"timestamp"`
+    Source    string    `json:"source"`
+}
+
+// CapitalFlow 资金流向
+type CapitalFlow struct {
+    MainNetInflow   decimal.Decimal `json:"main_net_inflow"`
+    SuperNetInflow  decimal.Decimal `json:"super_net_inflow"`
+    BigNetInflow    decimal.Decimal `json:"big_net_inflow"`
+    MiddleNetInflow decimal.Decimal `json:"middle_net_inflow"`
+    SmallNetInflow  decimal.Decimal `json:"small_net_inflow"`
+    ConsecutiveDays int             `json:"consecutive_days"`
+}
+
+// HasFlowPriceDivergence 检测量价背离
+func (s *Stock) HasFlowPriceDivergence() bool {
+    // 涨幅>3% 但主力净流出>1000万
+    return s.Change. GreaterThan(decimal.NewFromFloat(3)) &&
+           s.Capital.MainNetInflow.LessThan(decimal.NewFromFloat(-10000000))
+}
+
+// IsLowPriceStock 是否低价股
+func (s *Stock) IsLowPriceStock() bool {
+    return s.Price.LessThan(decimal.NewFromFloat(3))
+}
+
+// ===== internal/domain/entity/signal. go =====
+
+package entity
+
+import (
+    "time"
+    "github.com/shopspring/decimal"
+    "github.com/yourorg/alpha-detector/internal/domain/valueobject"
+)
+
+// Signal 交易信号实体
+type Signal struct {
+    ID          string                      `json:"id"`
+    
+    // 股票信息
+    StockCode   string                      `json:"stock_code"`
+    StockName   string                      `json:"stock_name"`
+    Market      string                      `json:"market"`
+    
+    // 信号信息
+    SignalType  valueobject.SignalType      `json:"signal_type"`
+    Confidence  decimal.Decimal             `json:"confidence"`
+    
+    // 评分信息
+    FactorScores []FactorScore              `json:"factor_scores"`
+    TotalScore   int                        `json:"total_score"`
+    
+    // AI分析
+    AIReasoning  AIReasoning                `json:"ai_reasoning"`
+    
+    // 价格目标
+    PriceTargets PriceTargets               `json:"price_targets"`
+    
+    // 风险信息
+    RiskLevel    valueobject.RiskLevel      `json:"risk_level"`
+    RiskScore    int                        `json:"risk_score"`
+    
+    // 仓位建议
+    PositionAdvice PositionAdvice           `json:"position_advice"`
+    
+    // 时效性
+    TimeHorizon  string                     `json:"time_horizon"`
+    GeneratedAt  time.Time                  `json:"generated_at"`
+    ExpiresAt    time.Time                  `json:"expires_at"`
+    
+    // 追踪
+    TraceID      string                     `json:"trace_id"`
+    LatencyMS    int64                      `json:"latency_ms"`
+    
+    // 成本
+    AITokensUsed int                        `json:"ai_tokens_used"`
+    AICostYuan   decimal.Decimal            `json:"ai_cost_yuan"`
+}
+
+type FactorScore struct {
+    Name   string          `json:"name"`
+    Weight decimal.Decimal `json:"weight"`
+    Score  int             `json:"score"`
+    Reason string          `json:"reason"`
+}
+
+type AIReasoning struct {
+    BullishFactors []string        `json:"bullish_factors"`
+    BearishFactors []string        `json:"bearish_factors"`
+    KeyInsight     string          `json:"key_insight"`
+    Confidence     decimal.Decimal `json:"confidence"`
+}
+
+type PriceTargets struct {
+    Current    decimal.Decimal `json:"current"`
+    Support    decimal.Decimal `json:"support"`
+    Resistance decimal.Decimal `json:"resistance"`
+    StopLoss   decimal.Decimal `json:"stop_loss"`
+    TakeProfit decimal.Decimal `json:"take_profit"`
+}
+
+type PositionAdvice struct {
+    Action     string          `json:"action"`      // BUY/HOLD/SELL
+    SizePct    decimal.Decimal `json:"size_pct"`    // 建议仓位%
+    EntryPrice string          `json:"entry_price"` // 入场价格区间
+    StopLossPct decimal.Decimal `json:"stop_loss_pct"`
+    TakeProfitPct decimal.Decimal `json:"take_profit_pct"`
+    HoldingDays string          `json:"holding_days"`
+    Reason     string          `json:"reason"`
+}
+
+// IsValid 验证信号有效性
+func (s *Signal) IsValid() bool {
+    return time.Now().Before(s.ExpiresAt)
+}
+
+// ShouldAlert 是否需要告警
+func (s *Signal) ShouldAlert() bool {
+    return s.SignalType == valueobject.SignalStrongBuy ||
+           s. SignalType == valueobject. SignalStrongAvoid
+}
+
+// ===== internal/domain/valueobject/signaltype.go =====
+
+package valueobject
+
+// SignalType 信号类型
+type SignalType string
+
+const (
+    SignalStrongBuy  SignalType = "STRONG_BUY"
+    SignalBuy        SignalType = "BUY"
+    SignalWatch      SignalType = "WATCH"
+    SignalAvoid      SignalType = "AVOID"
+    SignalStrongAvoid SignalType = "STRONG_AVOID"
+)
+
+func (s SignalType) IsValid() bool {
+    switch s {
+    case SignalStrongBuy, SignalBuy, SignalWatch, SignalAvoid, SignalStrongAvoid: 
+        return true
+    }
+    return false
+}
+
+func (s SignalType) IsBullish() bool {
+    return s == SignalStrongBuy || s == SignalBuy
+}
+
+func (s SignalType) IsBearish() bool {
+    return s == SignalAvoid || s == SignalStrongAvoid
+}
+
+// FromScore 根据评分转换信号
+func FromScore(score int) SignalType {
+    switch {
+    case score >= 85:
+        return SignalStrongBuy
+    case score >= 75:
+        return SignalBuy
+    case score >= 60:
+        return SignalWatch
+    case score >= 50:
+        return SignalAvoid
+    default:
+        return SignalStrongAvoid
+    }
+}
+
+// RiskLevel 风险等级
+type RiskLevel string
+
+const (
+    RiskLow    RiskLevel = "LOW"
+    RiskMedium RiskLevel = "MEDIUM"
+    RiskHigh   RiskLevel = "HIGH"
+)
+
+// ===== internal/domain/service/interfaces.go =====
+
+package service
+
+import (
+    "context"
+    "github.com/yourorg/alpha-detector/internal/domain/entity"
+)
+
+// DataFetcher 数据获取接口
+type DataFetcher interface {
+    // FetchActiveStocks 获取活跃股票列表
+    FetchActiveStocks(ctx context.Context, limit int) ([]*entity.Stock, error)
+    
+    // FetchByCode 获取单只股票
+    FetchByCode(ctx context.Context, code string) (*entity.Stock, error)
+    
+    // Stream 流式获取
+    Stream(ctx context.Context, out chan<- *entity.Stock) error
+    
+    // HealthCheck 健康检查
+    HealthCheck(ctx context.Context) error
+    
+    // Name 数据源名称
+    Name() string
+}
+
+// Analyzer AI分析接口
+type Analyzer interface {
+    // Analyze 分析股票
+    Analyze(ctx context.Context, stock *entity.Stock, preScore int) (*entity.Signal, error)
+    
+    // HealthCheck 健康检查
+    HealthCheck(ctx context.Context) error
+}
+
+// Scorer 评分接口
+type Scorer interface {
+    // Score 计算评分
+    Score(ctx context.Context, stock *entity. Stock) (int, []entity.FactorScore, error)
+}
+
+// RiskController 风控接口
+type RiskController interface {
+    // Validate 验证信号
+    Validate(ctx context.Context, signal *entity.Signal) error
+    
+    // ShouldDowngrade 是否需要降级
+    ShouldDowngrade(ctx context.Context) (bool, string)
+    
+    // RecordLoss 记录亏损
+    RecordLoss(amount float64)
+    
+    // RecordSignal 记录信号
+    RecordSignal()
+}
+
+// SignalSink 信号输出接口
+type SignalSink interface {
+    // Emit 输出信号
+    Emit(ctx context.Context, signal *entity.Signal) error
+    
+    // Close 关闭
+    Close() error
+    
+    // Name 名称
+    Name() string
+}
+Phase 2: Infrastructure (基础设施 - Week 3-4)
+Go
+// ═══════════════════════════════════════════════════════════════════
+// Sprint 2.1: 数据源适配器
+// ═══════════════════════════════════════════════════════════════════
+
+// ===== internal/infrastructure/gateway/eastmoney/client.go =====
+
+package eastmoney
+
+import (
+    "context"
+    "encoding/json"
+    "fmt"
+    "net/http"
+    "time"
+    
+    "github.com/shopspring/decimal"
+    "github.com/yourorg/alpha-detector/internal/domain/entity"
+    "github.com/yourorg/alpha-detector/pkg/ratelimit"
+)
+
+type Client struct {
+    baseURL    string
+    httpClient *http.Client
+    limiter    *ratelimit.TokenBucket
+}
+
+func NewClient(baseURL string, timeout time.Duration) *Client {
+    return &Client{
+        baseURL:  baseURL,
+        httpClient: &http.Client{
+            Timeout: timeout,
+        },
+        limiter: ratelimit. NewTokenBucket(10, 20), // 10 QPS, burst 20
+    }
+}
+
+func (c *Client) FetchActiveStocks(ctx context.Context, limit int) ([]*entity.Stock, error) {
+    // 限流
+    if err := c.limiter.Wait(ctx); err != nil {
+        return nil, fmt.Errorf("rate limit: %w", err)
+    }
+    
+    // 构建请求URL
+    url := fmt.Sprintf("%s/api/qt/clist/get?pn=1&pz=%d&fs=m: 0+t:6,m:0+t:80,m:1+t:2,m:1+t:23&fields=f12,f14,f2,f3,f62,f184,f66,f69,f72,f75,f78,f81,f84,f87,f124,f1,f13", 
+        c.baseURL, limit)
+    
+    req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+    if err != nil {
+        return nil, fmt.Errorf("create request: %w", err)
+    }
+    
+    resp, err := c.httpClient.Do(req)
+    if err != nil {
+        return nil, fmt.Errorf("do request: %w", err)
+    }
+    defer resp.Body.Close()
+    
+    if resp.StatusCode != http.StatusOK {
+        return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+    }
+    
+    var result EastMoneyResponse
+    if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+        return nil, fmt.Errorf("decode response: %w", err)
+    }
+    
+    return c.parseStocks(result.Data. Diff), nil
+}
+
+func (c *Client) parseStocks(rawData []map[string]interface{}) []*entity.Stock {
+    stocks := make([]*entity.Stock, 0, len(rawData))
+    
+    for _, item := range rawData {
+        stock := &entity.Stock{
+            Code:   getStringField(item, "f12"),
+            Name:   getStringField(item, "f14"),
+            Market: getMarket(getStringField(item, "f13")),
+            Price:  decimal.NewFromFloat(getFloatField(item, "f2")),
+            Change: decimal.NewFromFloat(getFloatField(item, "f3")),
+            Volume: int64(getFloatField(item, "f5")),
+            Amount: decimal. NewFromFloat(getFloatField(item, "f6")),
+            Capital: entity.CapitalFlow{
+                MainNetInflow:   decimal.NewFromFloat(getFloatField(item, "f62")),
+                SuperNetInflow: decimal.NewFromFloat(getFloatField(item, "f184")),
+                BigNetInflow:   decimal.NewFromFloat(getFloatField(item, "f66")),
+            },
+            Technical: entity.Technical{
+                VolumeRatio:  decimal.NewFromFloat(getFloatField(item, "f10")),
+                TurnoverRate: decimal.NewFromFloat(getFloatField(item, "f8")),
+            },
+            Timestamp: time.Now(),
+            Source:    "eastmoney",
+        }
+        stocks = append(stocks, stock)
+    }
+    
+    return stocks
+}
+
+func (c *Client) Name() string {
+    return "eastmoney"
+}
+
+func (c *Client) HealthCheck(ctx context.Context) error {
+    ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+    defer cancel()
+    
+    _, err := c.FetchActiveStocks(ctx, 1)
+    return err
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Sprint 2.2: AI Oracle (Kimi客户端)
+// ═══════════════════════════════════════════════════════════════════
+
+// ===== internal/infrastructure/gateway/kimi/client.go =====
+
+package kimi
+
+import (
+    "bytes"
+    "context"
+    "encoding/json"
+    "fmt"
+    "io"
+    "net/http"
+    "time"
+    
+    "github. com/yourorg/alpha-detector/internal/domain/entity"
+    "github.com/yourorg/alpha-detector/pkg/circuitbreaker"
+    "github.com/yourorg/alpha-detector/pkg/ratelimit"
+)
+
+type Client struct {
+    baseURL    string
+    apiKey     string
+    model      string
+    httpClient *http.Client
+    limiter    *ratelimit.TokenBucket
+    breaker    *circuitbreaker. Breaker
+    
+    // 成本追踪
+    totalTokensUsed int64
+    totalCost       float64
+}
+
+func NewClient(baseURL, apiKey, model string) *Client {
+    return &Client{
+        baseURL:  baseURL,
+        apiKey:   apiKey,
+        model:    model,
+        httpClient: &http.Client{
+            Timeout: 30 * time.Second,
+        },
+        limiter: ratelimit.NewTokenBucket(0. 5, 5), // 30 RPM = 0.5 RPS
+        breaker: circuitbreaker. New("kimi", 5, 60*time.Second),
+    }
+}
+
+func (c *Client) Analyze(ctx context.Context, stock *entity.Stock, preScore int) (*entity.Signal, error) {
+    // 限流
+    if err := c.limiter.Wait(ctx); err != nil {
+        return nil, fmt. Errorf("rate limit: %w", err)
+    }
+    
+    // 熔断检查
+    if ! c.breaker.AllowRequest() {
+        return nil, fmt. Errorf("circuit breaker open")
+    }
+    
+    start := time.Now()
+    
+    // 构建Prompt
+    userPrompt := c.buildUserPrompt(stock, preScore)
+    
+    // 调用API
+    req := KimiRequest{
+        Model:  c.model,
+        Messages: []Message{
+            {Role: "system", Content: SystemPrompt},
+            {Role:  "user", Content: userPrompt},
+        },
+        Temperature:  0.3,
+        MaxTokens:   1500,
+    }
+    
+    result, err := c.callAPI(ctx, req)
+    if err != nil {
+        c.breaker.RecordFailure()
+        return nil, fmt. Errorf("call kimi api: %w", err)
+    }
+    
+    c.breaker.RecordSuccess()
+    
+    // 解析结果
+    signal, err := c. parseResponse(result, stock)
+    if err != nil {
+        return nil, fmt.Errorf("parse response: %w", err)
+    }
+    
+    // 补充元数据
+    signal. LatencyMS = time.Since(start).Milliseconds()
+    signal.AITokensUsed = result.Usage.TotalTokens
+    signal.AICostYuan = c.calculateCost(result.Usage)
+    
+    // 更新成本统计
+    c.totalTokensUsed += int64(result.Usage.TotalTokens)
+    c.totalCost += signal.AICostYuan. InexactFloat64()
+    
+    return signal, nil
+}
+
+func (c *Client) buildUserPrompt(stock *entity.Stock, preScore int) string {
+    // 使用模板生成Prompt (详见前文User Prompt Template)
+    return fmt.Sprintf(`## 待分析股票
+
+**%s (%s)** - %s - %s
+
+---
+
+## 实时数据
+
+### 📊 基础行情
+- **当前价格**: %. 2f 元
+- **今日涨跌**: %.2f%%
+- **成交额**: %.2f 亿元
+... 
+
+## 多因子预评分
+综合预评分: %d/100
+
+请严格按照 CAMP-I 五维度模型进行分析并以JSON格式输出。`,
+        stock.Name, stock.Code, stock.Market, stock.Industry,
+        stock.Price.InexactFloat64(),
+        stock.Change.InexactFloat64(),
+        stock.Amount.InexactFloat64()/100000000,
+        preScore,
+    )
+}
+
+func (c *Client) callAPI(ctx context.Context, req KimiRequest) (*KimiResponse, error) {
+    body, err := json.Marshal(req)
+    if err != nil {
+        return nil, fmt. Errorf("marshal request: %w", err)
+    }
+    
+    httpReq, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/chat/completions", bytes.NewReader(body))
+    if err != nil {
+        return nil, fmt.Errorf("create request: %w", err)
+    }
+    
+    httpReq.Header.Set("Content-Type", "application/json")
+    httpReq.Header.Set("Authorization", "Bearer "+c.apiKey)
+    
+    resp, err := c.httpClient.Do(httpReq)
+    if err != nil {
+        return nil, fmt. Errorf("do request: %w", err)
+    }
+    defer resp.Body.Close()
+    
+    if resp.StatusCode != http.StatusOK {
+        bodyBytes, _ := io.ReadAll(resp.Body)
+        return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(bodyBytes))
+    }
+    
+    var result KimiResponse
+    if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+        return nil, fmt.Errorf("decode response: %w", err)
+    }
+    
+    return &result, nil
+}
+
+func (c *Client) parseResponse(resp *KimiResponse, stock *entity.Stock) (*entity.Signal, error) {
+    if len(resp.Choices) == 0 {
+        return nil, fmt.Errorf("empty choices in response")
+    }
+    
+    content := resp.Choices[0]. Message.Content
+    
+    // 提取JSON部分 (去除markdown代码块标记)
+    jsonStr := extractJSON(content)
+    
+    var aiResult AIAnalysisResult
+    if err := json.Unmarshal([]byte(jsonStr), &aiResult); err != nil {
+        return nil, fmt.Errorf("unmarshal ai result: %w", err)
+    }
+    
+    // 转换为Signal实体
+    signal := &entity. Signal{
+        ID:          generateID(),
+        StockCode:   stock.Code,
+        StockName:   stock.Name,
+        Market:      stock. Market,
+        SignalType:  valueobject.SignalType(aiResult.Signal),
+        Confidence:  decimal.NewFromFloat(aiResult.Confidence),
+        TotalScore:  aiResult.TotalScore,
+        AIReasoning: entity.AIReasoning{
+            BullishFactors: aiResult. Reasoning.BullishFactors,
+            BearishFactors:  aiResult.Reasoning.BearishFactors,
+            KeyInsight:     aiResult.Reasoning. KeyInsight,
+            Confidence:     decimal.NewFromFloat(aiResult.Confidence),
+        },
+        PriceTargets: entity.PriceTargets{
+            Current:     stock.Price,
+            Support:    decimal.NewFromFloat(aiResult. PriceTargets.Support),
+            Resistance: decimal.NewFromFloat(aiResult.PriceTargets.Resistance),
+            StopLoss:   decimal.NewFromFloat(aiResult.PriceTargets.StopLoss),
+            TakeProfit: decimal.NewFromFloat(aiResult.PriceTargets.TakeProfit),
+        },
+        RiskLevel:   valueobject. RiskLevel(aiResult.RiskAssessment.Level),
+        RiskScore:   aiResult.RiskAssessment.RiskScore,
+        TimeHorizon: aiResult.TimeHorizon,
+        GeneratedAt: time.Now(),
+        ExpiresAt:   time.Now().Add(4 * time.Hour),
+    }
+    
+    // 转换因子评分
+    for _, factor := range aiResult. Factors {
+        signal. FactorScores = append(signal.FactorScores, entity.FactorScore{
+            Name:   factor.Name,
+            Weight: decimal.NewFromFloat(factor.Weight),
+            Score:  factor.Score,
+            Reason: factor.Reason,
+        })
+    }
+    
+    // 仓位建议
+    signal. PositionAdvice = entity. PositionAdvice{
+        Action:         aiResult.PositionSuggestion.Action,
+        SizePct:        decimal.NewFromInt(int64(aiResult.PositionSuggestion.SizePct)),
+        EntryPrice:     aiResult.PositionSuggestion.EntryPrice,
+        StopLossPct:    decimal.NewFromInt(int64(aiResult.PositionSuggestion.StopLossPct)),
+        TakeProfitPct:  decimal.NewFromInt(int64(aiResult.PositionSuggestion.TakeProfitPct)),
+        HoldingDays:    aiResult.PositionSuggestion.HoldingDays,
+        Reason:         aiResult.PositionSuggestion.Reason,
+    }
+    
+    return signal, nil
+}
+
+func (c *Client) calculateCost(usage TokenUsage) decimal.Decimal {
+    // Kimi价格:  ¥12/百万tokens (输入输出同价)
+    pricePerMToken := 12.0
+    totalTokens := float64(usage.TotalTokens)
+    cost := (totalTokens / 1000000. 0) * pricePerMToken
+    return decimal.NewFromFloat(cost)
+}
+
+func (c *Client) GetTotalCost() float64 {
+    return c.totalCost
+}
+
+func (c *Client) HealthCheck(ctx context.Context) error {
+    return c.breaker.IsHealthy()
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Sprint 2.3: 韧性组件
+// ═══════════════════════════════════════════════════════════════════
+
+// ===== pkg/ratelimit/tokenbucket.go =====
+
+package ratelimit
+
+import (
+    "context"
+    "math"
+    "sync"
+    "time"
+)
+
+type TokenBucket struct {
+    rate       float64       // tokens per second
+    burst      int           // max tokens
+    tokens     float64       // current tokens
+    lastUpdate time.Time
+    mu         sync. Mutex
+}
+
+func NewTokenBucket(rate float64, burst int) *TokenBucket {
+    return &TokenBucket{
+        rate:       rate,
+        burst:      burst,
+        tokens:     float64(burst),
+        lastUpdate: time.Now(),
+    }
+}
+
+func (tb *TokenBucket) Wait(ctx context.Context) error {
+    tb.mu.Lock()
+    
+    // Refill tokens
+    now := time.Now()
+    elapsed := now.Sub(tb.lastUpdate).Seconds()
+    tb.tokens = math.Min(float64(tb.burst), tb.tokens+elapsed*tb.rate)
+    tb.lastUpdate = now
+    
+    if tb.tokens >= 1 {
+        tb.tokens--
+        tb.mu.Unlock()
+        return nil
+    }
+    
+    // Calculate wait time
+    waitDuration := time.Duration((1-tb.tokens)/tb.rate*1000) * time.Millisecond
+    tb.mu. Unlock()
+    
+    select {
+    case <-time.After(waitDuration):
+        tb.mu.Lock()
+        tb.tokens = 0
+        tb.lastUpdate = time.Now()
+        tb.mu.Unlock()
+        return nil
+    case <-ctx.Done():
+        return ctx.Err()
+    }
+}
+
+func (tb *TokenBucket) TryAcquire() bool {
+    tb.mu.Lock()
+    defer tb.mu.Unlock()
+    
+    // Refill
+    now := time.Now()
+    elapsed := now.Sub(tb.lastUpdate).Seconds()
+    tb.tokens = math.Min(float64(tb.burst), tb.tokens+elapsed*tb. rate)
+    tb.lastUpdate = now
+    
+    if tb.tokens >= 1 {
+        tb.tokens--
+        return true
+    }
+    return false
+}
+
+// ===== pkg/circuitbreaker/breaker.go =====
+
+package circuitbreaker
+
+import (
+    "sync"
+    "time"
+)
+
+type State int
+
+const (
+    StateClosed State = iota
+    StateOpen
+    StateHalfOpen
+)
+
+type Breaker struct {
+    name             string
+    failureThreshold int
+    timeout          time.Duration
+    
+    state         State
+    failures      int
+    successes     int
+    lastFailure   time.Time
+    mu            sync.RWMutex
+    
+    onStateChange func(from, to State)
+}
+
+func New(name string, failureThreshold int, timeout time.Duration) *Breaker {
+    return &Breaker{
+        name:             name,
+        failureThreshold: failureThreshold,
+        timeout:           timeout,
+        state:            StateClosed,
+    }
+}
+
+func (cb *Breaker) AllowRequest() bool {
+    cb.mu.RLock()
+    defer cb.mu.RUnlock()
+    
+    switch cb.state {
+    case StateClosed:
+        return true
+    case StateOpen:
+        if time.Since(cb.lastFailure) > cb.timeout {
+            cb.mu.RUnlock()
+            cb.mu.Lock()
+            cb.state = StateHalfOpen
+            cb.successes = 0
+            cb. mu.Unlock()
+            cb.mu.RLock()
+            return true
+        }
+        return false
+    case StateHalfOpen: 
+        return true
+    }
+    return false
+}
+
+func (cb *Breaker) RecordSuccess() {
+    cb.mu.Lock()
+    defer cb.mu.Unlock()
+    
+    cb.failures = 0
+    if cb.state == StateHalfOpen {
+        cb.successes++
+        if cb.successes >= 3 {
+            cb.transitionTo(StateClosed)
+        }
+    }
+}
+
+func (cb *Breaker) RecordFailure() {
+    cb.mu.Lock()
+    defer cb.mu.Unlock()
+    
+    cb.failures++
+    cb.lastFailure = time.Now()
+    
+    if cb.failures >= cb. failureThreshold {
+        cb.transitionTo(StateOpen)
+    }
+}
+
+func (cb *Breaker) transitionTo(newState State) {
+    if cb.state != newState {
+        oldState := cb.state
+        cb.state = newState
+        cb.failures = 0
+        cb.successes = 0
+        
+        if cb.onStateChange != nil {
+            go cb.onStateChange(oldState, newState)
+        }
+    }
+}
+
+func (cb *Breaker) IsHealthy() error {
+    cb.mu.RLock()
+    defer cb.mu.RUnlock()
+    
+    if cb.state == StateOpen {
+        return fmt.Errorf("circuit breaker %s is open", cb.name)
+    }
+    return nil
+}
+Phase 3: Application Logic (应用逻辑 - Week 5-6)
+Go
+// ═══════════════════════════════════════════════════════════════════
+// Sprint 3.1: Pipeline编排器
+// ═══════════════════════════════════════════════════════════════════
+
+// ===== internal/application/pipeline/orchestrator.go =====
+
+package pipeline
+
+import (
+    "context"
+    "fmt"
+    "log/slog"
+    
+    "golang.org/x/sync/errgroup"
+    "github.com/yourorg/alpha-detector/internal/domain/entity"
+    "github. com/yourorg/alpha-detector/internal/domain/service"
+    "github.com/yourorg/alpha-detector/internal/observability"
+)
+
+type Orchestrator struct {
+    fetcher    service.DataFetcher
+    scorer     service.Scorer
+    analyzer   service.Analyzer
+    riskCtrl   service.RiskController
+    sink       service.SignalSink
+    
+    workers    int
+    batchSize  int
+    logger     *slog.Logger
+    tracer     *observability.Tracer
+}
+
+func NewOrchestrator(
+    fetcher service.DataFetcher,
+    scorer service. Scorer,
+    analyzer service. Analyzer,
+    riskCtrl service.RiskController,
+    sink service.SignalSink,
+    workers int,
+    logger *slog.Logger,
+    tracer *observability.Tracer,
+) *Orchestrator {
+    return &Orchestrator{
+        fetcher:   fetcher,
+        scorer:    scorer,
+        analyzer:  analyzer,
+        riskCtrl:   riskCtrl,
+        sink:      sink,
+        workers:   workers,
+        batchSize: 20,
+        logger:    logger,
+        tracer:    tracer,
+    }
+}
+
+func (o *Orchestrator) Run(ctx context.Context) error {
+    // 创建全局TraceID
+    ctx = o.tracer.WithTraceID(ctx)
+    log := observability.LoggerFromContext(ctx, o.logger)
+    
+    log.Info("pipeline started", "workers", o.workers)
+    
+    g, ctx := errgroup.WithContext(ctx)
+    
+    // Stage 1: Fetch
+    stocksCh := make(chan *entity.Stock, o.workers*2)
+    g.Go(func() error {
+        defer close(stocksCh)
+        return o.fetchStage(ctx, stocksCh)
+    })
+    
+    // Stage 2: Score
+    scoredCh := make(chan *ScoredStock, o.workers*2)
+    g.Go(func() error {
+        defer close(scoredCh)
+        return o.scoreStage(ctx, stocksCh, scoredCh)
+    })
+    
+    // Stage 3: Analyze (Fan-out)
+    signalsCh := make(chan *entity.Signal, o.workers*2)
+    for i := 0; i < o.workers; i++ {
+        workerID := i
+        g.Go(func() error {
+            return o.analyzeWorker(ctx, scoredCh, signalsCh, workerID)
+        })
+    }
+    
+    // Close signalsCh when all workers done
+    go func() {
+        g.Wait()
+        close(signalsCh)
+    }()
+    
+    // Stage 4: Sink
+    g.Go(func() error {
+        return o.sinkStage(ctx, signalsCh)
+    })
+    
+    if err := g.Wait(); err != nil && err != context.Canceled {
+        return fmt.Errorf("pipeline error: %w", err)
+    }
+    
+    log.Info("pipeline completed")
+    return nil
+}
+
+func (o *Orchestrator) fetchStage(ctx context.Context, out chan<- *entity.Stock) error {
+    log := observability.LoggerFromContext(ctx, o.logger)
+    
+    stocks, err := o.fetcher.FetchActiveStocks(ctx, 200)
+    if err != nil {
+        return fmt.Errorf("fetch stocks: %w", err)
+    }
+    
+    log.Info("fetched stocks", "count", len(stocks))
+    
+    for _, stock := range stocks {
+        select {
+        case out <- stock: 
+        case <-ctx.Done():
+            return ctx.Err()
+        }
+    }
+    
+    return nil
+}
+
+func (o *Orchestrator) scoreStage(ctx context.Context, in <-chan *entity.Stock, out chan<- *ScoredStock) error {
+    for stock := range in {
+        score, factors, err := o.scorer.Score(ctx, stock)
+        if err != nil {
+            o.logger. Warn("score error", "stock", stock.Code, "error", err)
+            continue
+        }
+        
+        select {
+        case out <- &ScoredStock{Stock: stock, Score: score, Factors: factors}:
+        case <-ctx.Done():
+            return ctx.Err()
+        }
+    }
+    return nil
+}
+
+func (o *Orchestrator) analyzeWorker(ctx context.Context, in <-chan *ScoredStock, out chan<- *entity.Signal, workerID int) error {
+    log := observability.LoggerFromContext(ctx, o.logger)
+    
+    for scored := range in {
+        // 检查是否需要降级
+        if shouldDowngrade, reason := o.riskCtrl. ShouldDowngrade(ctx); shouldDowngrade {
+            log. Warn("risk downgrade", "reason", reason)
+            continue
+        }
+        
+        signal, err := o.analyzer.Analyze(ctx, scored. Stock, scored.Score)
+        if err != nil {
+            log. Warn("analyze error", "stock", scored.Stock.Code, "error", err)
+            continue
+        }
+        
+        // 风控验证
+        if err := o. riskCtrl.Validate(ctx, signal); err != nil {
+            log.Warn("risk validation failed", "stock", signal.StockCode, "reason", err)
+            continue
+        }
+        
+        select {
+        case out <- signal: 
+            log.Debug("signal generated", 
+                "stock", signal.StockCode, 
+                "signal", signal.SignalType,
+                "score", signal.TotalScore,
+                "worker", workerID,
+            )
+        case <-ctx. Done():
+            return ctx. Err()
+        }
+    }
+    return nil
+}
+
+func (o *Orchestrator) sinkStage(ctx context.Context, in <-chan *entity. Signal) error {
+    for signal := range in {
+        if err := o.sink.Emit(ctx, signal); err != nil {
+            o.logger.Error("sink error", "signal", signal.ID, "error", err)
+        }
+    }
+    return nil
+}
+
+type ScoredStock struct {
+    Stock   *entity.Stock
+    Score   int
+    Factors []entity. FactorScore
+}
+Phase 4: Deployment & Operations (部署运维 - Week 7-8)
+Dockerfile
+# ===== Dockerfile =====
+
+# Build stage
+FROM golang:1.22-alpine AS builder
+
+WORKDIR /build
+
+# Install dependencies
+RUN apk add --no-cache git make
+
+# Copy go mod files
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY . . 
+
+# Build binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    -ldflags="-w -s -X main.Version=$(git describe --tags --always) -X main.BuildTime=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+    -o /app/alpha-detector \
+    ./cmd/alpha
+
+# Runtime stage
+FROM alpine:3.19
+
+RUN apk --no-cache add ca-certificates tzdata
+
+WORKDIR /app
+
+# Copy binary and configs
+COPY --from=builder /app/alpha-detector . 
+COPY configs/ ./configs/
+
+# Create non-root user
+RUN adduser -D -u 1000 appuser && \
+    chown -R appuser:appuser /app
+
+USER appuser
+
+EXPOSE 8888 9090
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD wget -q --spider http://localhost:9090/health || exit 1
+
+ENTRYPOINT ["./alpha-detector"]
+CMD ["--config", "configs/config.yaml"]
+YAML
+# ===== docker-compose.yaml =====
+
+version: '3.8'
+
+services:
+  alpha-detector:
+    build:  .
+    container_name: alpha-detector
+    restart: unless-stopped
+    ports:
+      - "8888:8888"   # API
+      - "9090:9090"   # Metrics
+    environment:
+      - ALPHA_KIMI_API_KEY=${ALPHA_KIMI_API_KEY}
+      - ALPHA_DB_HOST=timescaledb
+      - ALPHA_DB_PASSWORD=${DB_PASSWORD}
+      - ALPHA_REDIS_ADDR=redis:6379
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./logs:/app/logs
+      - ./configs:/app/configs: ro
+    depends_on: 
+      - timescaledb
+      - redis
+    networks:
+      - alpha-net
+
+  timescaledb: 
+    image: timescale/timescaledb:latest-pg15
+    container_name: timescaledb
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=alpha
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=alpha_detector
+    volumes:
+      - timescale-data:/var/lib/postgresql/data
+    networks:
+      - alpha-net
+
+  redis: 
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks: 
+      - alpha-net
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9091:9090"
+    volumes: 
+      - ./deployments/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    networks:
+      - alpha-net
+
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel
+    volumes:
+      - ./deployments/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./deployments/grafana/provisioning:/etc/grafana/provisioning
+      - grafana-data:/var/lib/grafana
+    networks: 
+      - alpha-net
+
+volumes:
+  timescale-data:
+  redis-data: 
+  prometheus-data:
+  grafana-data: 
+
+networks:
+  alpha-net: 
+    driver: bridge
+Makefile
+# ===== Makefile =====
+
+. PHONY: help build run test lint docker clean wire backtest
+
+BINARY_NAME=alpha-detector
+VERSION=$(shell git describe --tags --always --dirty)
+BUILD_TIME=$(shell date -u '+%Y-%m-%d_%H:%M:%S')
+LDFLAGS=-ldflags "-X main.Version=$(VERSION) -X main.BuildTime=$(BUILD_TIME)"
+
+## help:  显示帮助信息
+help:
+	@echo "Available targets:"
+	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ': ' | sed -e 's/^/ /'
+
+## build: 构建二进制文件
+build:
+	@echo "Building $(BINARY_NAME)..."
+	go build $(LDFLAGS) -o bin/$(BINARY_NAME) ./cmd/alpha
+
+## run: 运行应用 (开发模式)
+run:
+	go run ./cmd/alpha --config configs/config.yaml
+
+## test: 运行所有测试
+test:
+	go test -v -race -coverprofile=coverage.out ./... 
+	go tool cover -html=coverage.out -o coverage. html
+	@echo "Coverage report:  coverage.html"
+
+## test-unit: 运行单元测试
+test-unit:
+	go test -v -short ./...
+
+## test-integration: 运行集成测试
+test-integration: 
+	go test -v -run Integration ./test/integration/...
+
+## lint: 代码检查
+lint:
+	golangci-lint run ./...
+
+## wire: 生成依赖注入代码
+wire:
+	cd cmd/alpha && wire
+
+## docker-build: 构建Docker镜像
+docker-build:
+	docker build -t $(BINARY_NAME):$(VERSION) .
+	docker tag $(BINARY_NAME):$(VERSION) $(BINARY_NAME):latest
+
+## docker-run: 运行Docker Compose
+docker-run:
+	docker-compose up -d
+
+## docker-stop: 停止Docker Compose
+docker-stop:
+	docker-compose down
+
+## docker-logs: 查看日志
+docker-logs:
+	docker-compose logs -f alpha-detector
+
+## backtest: 运行回测
+backtest: 
+	@if [ -z "$(START)" ] || [ -z "$(END)" ]; then \
+		echo "Usage: make backtest START=2024-01-01 END=2024-12-31"; \
+		exit 1; \
+	fi
+	go run ./cmd/backtest --start=$(START) --end=$(END) --config=configs/config.yaml
+
+## clean: 清理构建产物
+clean:
+	rm -rf bin/ coverage.out coverage.html
+	go clean
+
+## deps: 安装开发依赖
+deps: 
+	go install github.com/google/wire/cmd/wire@latest
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+. DEFAULT_GOAL := help
+🎓 Final Checklist & Success Metrics (最终检查清单)
+功能完整性
+ 数据采集：东方财富、新浪、同花顺多源
+ 多因子评分：CAMP-I五维度模型
+ AI分析：Kimi API集成 + Prompt工程
+ 风控系统：6层风控 + 熔断机制
+ 信号输出：Console/JSON/Webhook/Kafka/WebSocket
+ 可观测性：TraceID/Metrics/Logging/Cost Tracking
+ 配置管理：YAML + 环境变量
+ 部署方案：Docker + K8s + Makefile
+性能指标
+ 信号延迟 < 500ms (P99)
+ 系统可用性 > 99.9%
+ AI单次成本 < ¥0.3
+ 日处理能力 > 5000股
+代码质量
+ 单元测试覆盖率 > 80%
+ 所有错误wrap并向上传递
+ Context检查，毫秒级退出
+ 注释解释"Why"而非"What"
+ golangci-lint通过
+商业价值
+ 回测胜率 > 55%
+ 夏普比率 > 1.5
+ 最大回撤 < 20%
+ 月度盈利稳定性
