@@ -136,6 +136,19 @@ export ALPHA_KIMI_API_KEY="your-kimi-api-key"
 
 ### 运行
 
+#### 查看版本和系统信息
+
+```bash
+./bin/alpha-detector version
+```
+
+#### 健康检查
+
+```bash
+# 检查配置、数据源和AI服务状态
+./bin/alpha-detector health
+```
+
 #### 演示模式（使用示例数据）
 
 ```bash
@@ -157,6 +170,20 @@ export ALPHA_KIMI_API_KEY="your-api-key"
 
 # 查看帮助
 ./bin/alpha-detector scan-real --help
+```
+
+#### 所有可用命令
+
+```bash
+# 查看所有命令
+./bin/alpha-detector --help
+
+# 可用命令：
+#   scan       - 演示模式（使用示例数据）
+#   scan-real  - 实时模式（真实数据 + AI分析）
+#   version    - 显示版本信息
+#   health     - 系统健康检查
+#   help       - 帮助信息
 ```
 
 **注意**: 实时模式会连接东方财富API获取实时市场数据，并调用Kimi AI进行分析，会产生API费用。
@@ -241,6 +268,78 @@ export ALPHA_KIMI_API_KEY="your-api-key"
    - 时间止损（最长持有30天）
 
 ## 📈 使用示例
+
+### 快速开始
+
+```bash
+# 1. 查看版本
+./bin/alpha-detector version
+
+# 2. 健康检查
+./bin/alpha-detector health
+
+# 3. 运行演示
+./bin/alpha-detector scan
+```
+
+### 配置文件
+
+系统提供了详细的配置示例：
+
+```bash
+# 查看配置示例
+cat configs/config.example.yaml
+
+# 复制并编辑配置
+cp configs/config.example.yaml configs/config.local.yaml
+vim configs/config.local.yaml
+```
+
+**主要配置项：**
+
+```yaml
+# 数据源
+data_source:
+  primary: "eastmoney"
+  timeout: 10s
+
+# AI配置
+ai:
+  provider: "kimi"
+  model: "moonshot-v1-8k"
+  api_key: ""  # 从环境变量读取
+
+# 风控
+risk:
+  daily_max_loss: 50000.0
+  max_signals_per_day: 20
+
+# Pipeline
+pipeline:
+  workers: 3
+  limit: 100
+
+# 信号输出
+sinks:
+  console:
+    enabled: true
+  json_file:
+    enabled: false
+    output_dir: "output/signals"
+  webhook:
+    enabled: false
+    url: ""
+    format: "dingtalk"
+
+# 过滤器
+filters:
+  enable_basic: true
+  enable_liquidity: true
+  min_volume: 100000
+  min_amount: 10000000.0
+  whitelist: []
+  blacklist: []
+```
 
 ### 扫描市场
 
