@@ -104,7 +104,7 @@ func (s *ConsoleSink) emitPretty(signal *entity.Signal) error {
 	fmt.Printf("  AI成本: ¥%.2f (%d tokens)\n",
 		signal.AICostYuan.InexactFloat64(), signal.AITokensUsed)
 
-	fmt.Println("═══════════════════════════════════════════════════════════\n")
+	fmt.Println("═══════════════════════════════════════════════════════════")
 
 	return nil
 }
