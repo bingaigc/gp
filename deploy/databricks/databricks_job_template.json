@@ -1,0 +1,64 @@
+{
+  "name": "alpha-detector-service",
+  "description": "CAMP-I Alpha Signal Detection Service - Long-running service with REST API and background scheduler",
+  "job_clusters": [
+    {
+      "job_cluster_key": "alpha-detector-cluster",
+      "new_cluster": {
+        "spark_version": "13.3.x-scala2.12",
+        "node_type_id": "m6g.xlarge",
+        "num_workers": 0,
+        "custom_tags": {
+          "ResourceClass": "SingleNode",
+          "Project": "AlphaDetector"
+        },
+        "spark_conf": {
+          "spark.master": "local[*]",
+          "spark.databricks.cluster.profile": "singleNode"
+        },
+        "aws_attributes": {
+          "availability": "SPOT_WITH_FALLBACK"
+        },
+        "docker_image": {
+          "url": "your-registry.azurecr.io/alpha-detector-service:latest",
+          "basic_auth": {
+            "username": "{{secrets/container-registry/username}}",
+            "password": "{{secrets/container-registry/password}}"
+          }
+        },
+        "spark_env_vars": {
+          "RUN_MODE": "all",
+          "API_PORT": "8080",
+          "LOG_LEVEL": "info",
+          "LOG_FORMAT": "json",
+          "SCAN_INTERVAL": "1h",
+          "PREDICT_INTERVAL": "6h",
+          "RUN_ON_STARTUP": "true",
+          "ALPHA_KIMI_API_KEY": "{{secrets/alpha-detector/kimi-api-key}}",
+          "REDIS_URL": "{{secrets/alpha-detector/redis-url}}",
+          "POSTGRES_URL": "{{secrets/alpha-detector/postgres-url}}",
+          "KAFKA_BROKERS": "{{secrets/alpha-detector/kafka-brokers}}"
+        }
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "task_key": "alpha-detector-service",
+      "job_cluster_key": "alpha-detector-cluster",
+      "libraries": [],
+      "spark_python_task": {
+        "python_file": "dbfs:/databricks/scripts/keep_alive.py"
+      },
+      "timeout_seconds": 0,
+      "max_retries": -1
+    }
+  ],
+  "schedule": {
+    "quartz_cron_expression": "0 0 0 * * ?",
+    "timezone_id": "UTC",
+    "pause_status": "UNPAUSED"
+  },
+  "max_concurrent_runs": 1,
+  "format": "MULTI_TASK"
+}

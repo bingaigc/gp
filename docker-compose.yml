@@ -1,0 +1,209 @@
+version: '3.8'
+
+services:
+  # 核心应用 (3副本)
+  alpha-detector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: alpha-detector:latest
+    container_name: alpha-detector-1
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    environment:
+      - ALPHA_KIMI_API_KEY=${ALPHA_KIMI_API_KEY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${POSTGRES_DB:-alpha_detector}
+      - POSTGRES_USER=${POSTGRES_USER:-alpha}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - KAFKA_BROKERS=kafka:9092
+      - JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - LOG_LEVEL=info
+    depends_on:
+      - redis
+      - postgres
+      - kafka
+      - jaeger
+    volumes:
+      - ./configs:/app/configs
+      - ./data:/app/data
+    networks:
+      - alpha-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: alpha-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - alpha-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # PostgreSQL数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: alpha-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-alpha_detector}
+      - POSTGRES_USER=${POSTGRES_USER:-alpha}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - alpha-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-alpha}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Zookeeper (Kafka依赖)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: alpha-zookeeper
+    restart: unless-stopped
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+    networks:
+      - alpha-network
+
+  # Kafka消息队列
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: alpha-kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+      - "19092:19092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    depends_on:
+      - zookeeper
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - alpha-network
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus监控
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: alpha-prometheus
+    restart: unless-stopped
+    ports:
+      - "9091:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - alpha-network
+    depends_on:
+      - alpha-detector
+
+  # Grafana可视化
+  grafana:
+    image: grafana/grafana:latest
+    container_name: alpha-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./configs/grafana-dashboards.json:/etc/grafana/provisioning/dashboards/alpha-dashboard.json
+    networks:
+      - alpha-network
+    depends_on:
+      - prometheus
+
+  # Jaeger分布式追踪
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: alpha-jaeger
+    restart: unless-stopped
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+      - "9411:9411"
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+    networks:
+      - alpha-network
+
+  # Nginx反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: alpha-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./configs/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - alpha-detector
+    networks:
+      - alpha-network
+
+networks:
+  alpha-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  postgres-data:
+  kafka-data:
+  zookeeper-data:
+  zookeeper-logs:
+  prometheus-data:
+  grafana-data:

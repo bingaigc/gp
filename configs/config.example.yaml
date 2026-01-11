@@ -1,0 +1,145 @@
+# ═══════════════════════════════════════════════════════════
+# CAMP-I Alpha Detector Configuration Example
+# ═══════════════════════════════════════════════════════════
+# 
+# 这是一个完整的配置示例，展示了所有可用的配置选项。
+# 复制此文件并根据您的需求进行修改。
+#
+# 环境变量覆盖：
+#   ALPHA_KIMI_API_KEY - Kimi AI API密钥（必需用于实时模式）
+# ═══════════════════════════════════════════════════════════
+
+# ===== 系统配置 =====
+system:
+  name: "CAMP-I Alpha Detector"
+  version: "2.0.0"
+  environment: "development"  # development, staging, production
+  log_level: "info"           # debug, info, warn, error
+
+# ===== 数据源配置 =====
+data_source:
+  primary: "eastmoney"        # 主数据源：eastmoney
+  timeout: 10s                # API请求超时时间
+  max_retry: 3                # 最大重试次数
+
+# ===== AI配置 =====
+ai:
+  provider: "kimi"                                # AI提供商
+  model: "moonshot-v1-8k"                         # 模型名称
+  base_url: "https://api.moonshot.cn/v1"          # API基础URL
+  api_key: ""                                     # API密钥（从环境变量读取）
+  timeout: 30s                                    # AI请求超时时间
+  max_retry: 2                                    # 最大重试次数
+
+# ===== 风控配置 =====
+risk:
+  daily_max_loss: 50000.0           # 日最大亏损（元）
+  max_signals_per_day: 20           # 日最大信号数
+  max_consecutive_losses: 3         # 最大连续亏损次数
+  min_confidence: 0.6               # 最低置信度（60%）
+
+# ===== Pipeline配置 =====
+pipeline:
+  workers: 3                        # AI分析并发worker数
+  batch_size: 20                    # 批处理大小
+  limit: 100                        # 单次扫描最大股票数
+
+# ===== 可观测性配置 =====
+observability:
+  enable_tracing: true              # 启用链路追踪
+  enable_metrics: true              # 启用指标收集
+
+# ===== 信号输出配置 =====
+sinks:
+  # 控制台输出
+  console:
+    enabled: true                   # 启用控制台输出
+    pretty: true                    # 美化输出（带颜色和emoji）
+
+  # JSON文件输出
+  json_file:
+    enabled: false                  # 启用JSON文件输出
+    output_dir: "output/signals"    # 输出目录
+    pretty: true                    # 美化JSON格式
+
+  # Webhook输出
+  webhook:
+    enabled: false                  # 启用Webhook推送
+    url: ""                         # Webhook URL
+    secret: ""                      # 认证密钥（可选）
+    format: "generic"               # 格式：dingtalk, feishu, generic
+
+# ===== 过滤器配置 =====
+filters:
+  # 基础过滤器（一票否决条件）
+  enable_basic: true                # 启用基础过滤
+  
+  # 流动性过滤器
+  enable_liquidity: true            # 启用流动性过滤
+  min_volume: 100000                # 最小成交量（10万手）
+  min_amount: 10000000.0            # 最小成交额（1000万元）
+  
+  # 白名单（仅分析指定股票，空列表表示不限制）
+  whitelist: []
+  # 示例：
+  # whitelist: ["600519", "000858", "600036"]  # 茅台、五粮液、招商银行
+  
+  # 黑名单（排除指定股票）
+  blacklist: []
+  # 示例：
+  # blacklist: ["300XXX", "002XXX"]  # 排除某些股票
+
+# ═══════════════════════════════════════════════════════════
+# 使用场景示例
+# ═══════════════════════════════════════════════════════════
+
+# 场景1：开发测试
+# ----------------
+# system.environment: "development"
+# sinks.console.enabled: true
+# sinks.json_file.enabled: false
+# sinks.webhook.enabled: false
+# filters.enable_basic: true
+# filters.enable_liquidity: false
+
+# 场景2：生产环境
+# ----------------
+# system.environment: "production"
+# sinks.console.enabled: true
+# sinks.json_file.enabled: true
+# sinks.json_file.output_dir: "/var/log/alpha-signals"
+# sinks.webhook.enabled: true
+# sinks.webhook.url: "https://oapi.dingtalk.com/robot/send?access_token=xxx"
+# sinks.webhook.format: "dingtalk"
+# filters.enable_basic: true
+# filters.enable_liquidity: true
+# filters.min_volume: 200000
+# filters.min_amount: 20000000.0
+
+# 场景3：聚焦策略（只关注特定股票）
+# ----------------
+# filters.whitelist: ["600519", "000858", "600036", "601318"]
+# pipeline.limit: 50
+# pipeline.workers: 2
+
+# ═══════════════════════════════════════════════════════════
+# 性能调优建议
+# ═══════════════════════════════════════════════════════════
+
+# CPU核心数较多时：
+#   pipeline.workers: 5-8
+
+# 内存受限时：
+#   pipeline.batch_size: 10
+#   pipeline.limit: 50
+
+# 成本优化：
+#   filters.enable_basic: true
+#   filters.enable_liquidity: true
+#   filters.min_volume: 200000  # 提高阈值
+
+# 追求覆盖面：
+#   pipeline.limit: 200
+#   filters.min_volume: 50000   # 降低阈值
+
+# ═══════════════════════════════════════════════════════════

@@ -1,0 +1,56 @@
+system:
+  name: "CAMP-I Alpha Detector"
+  version: "1.0.0"
+  environment: "development"
+  log_level: "info"
+
+data_source:
+  primary: "eastmoney"
+  timeout: 10s
+  max_retry: 3
+
+ai:
+  provider: "kimi"
+  model: "moonshot-v1-8k"
+  base_url: "https://api.moonshot.cn/v1"
+  api_key: ""  # 从环境变量 ALPHA_KIMI_API_KEY 读取
+  timeout: 30s
+  max_retry: 2
+
+risk:
+  daily_max_loss: 50000.0
+  max_signals_per_day: 20
+  max_consecutive_losses: 3
+  min_confidence: 0.6
+
+pipeline:
+  workers: 3
+  batch_size: 20
+  limit: 100
+
+observability:
+  enable_tracing: true
+  enable_metrics: true
+
+sinks:
+  console:
+    enabled: true
+    pretty: true
+  json_file:
+    enabled: false
+    output_dir: "output/signals"
+    pretty: true
+  webhook:
+    enabled: false
+    url: ""
+    secret: ""
+    format: "generic"  # "dingtalk", "feishu", "generic"
+
+filters:
+  enable_basic: true
+  enable_liquidity: true
+  min_volume: 100000      # 最小成交量 10万手
+  min_amount: 10000000.0  # 最小成交额 1000万元
+  whitelist: []           # 白名单股票代码
+  blacklist: []           # 黑名单股票代码
+

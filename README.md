@@ -1,0 +1,465 @@
+# CAMP-I Distributed Alpha Signal Detector
+
+[![Go Version](https://img.shields.io/badge/Go-1.21+-blue.svg)](https://golang.org)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+## 🎯 项目简介
+
+CAMP-I (Capital + Action + Margin + Plate + Institution) 是一个企业级分布式Alpha信号探测系统，旨在构建持续盈利的量化交易机器。
+
+### 核心特性
+
+- 📊 **CAMP-I五维度模型**: 资金面(30%) + 技术面(25%) + 估值面(20%) + 板块轮动(15%) + 机构行为(10%)
+- 🤖 **AI智能分析**: 集成Kimi AI进行深度市场分析
+- 🛡️ **多层风控体系**: 6级风控保护，最大回撤控制<20%
+- ⚡ **高性能并发**: 支持>5000股/日处理能力，信号延迟<500ms
+- 💰 **成本可控**: AI单次成本<¥0.3，日运营成本<¥100
+- 📡 **实时数据**: 集成东方财富API实时获取市场数据
+- 🔄 **Pipeline编排**: 多Worker并发处理，Fan-out/Fan-in模式
+
+### 性能指标
+
+| 维度 | 指标 | 目标值 |
+|------|------|--------|
+| 盈利能力 | 信号胜率 | > 55% |
+| 盈利能力 | 夏普比率 | > 1.5 |
+| 盈利能力 | 最大回撤 | < 20% |
+| 系统性能 | 信号延迟 | < 500ms |
+| 系统性能 | 日处理能力 | > 5000股 |
+| 成本控制 | AI单次成本 | < ¥0.3 |
+| 成本控制 | 日AI花费 | < ¥100 |
+
+## 🏗️ 系统架构
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              DISTRIBUTED ALPHA SIGNAL DETECTOR              │
+│                   (分布式Alpha信号探测器)                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌────────────────────────────────────────────────────┐    │
+│  │            DATA ACQUISITION LAYER                  │    │
+│  │  东方财富 / 新浪财经 / 同花顺 (多数据源容灾)          │    │
+│  └────────────────┬───────────────────────────────────┘    │
+│                   │                                         │
+│  ┌────────────────▼───────────────────────────────────┐    │
+│  │         PIPELINE ORCHESTRATOR (管道编排)           │    │
+│  │  Fetch → Filter → Score → Analyze → Sink          │    │
+│  └────────────────┬───────────────────────────────────┘    │
+│                   │                                         │
+│  ┌────────────────▼───────────────────────────────────┐    │
+│  │          RISK CONTROL LAYER (风控层)               │    │
+│  │  仓位控制 / 止损止盈 / 熔断机制                      │    │
+│  └────────────────┬───────────────────────────────────┘    │
+│                   │                                         │
+│  ┌────────────────▼───────────────────────────────────┐    │
+│  │          SIGNAL SINK LAYER (信号输出)              │    │
+│  │  Console / JSON / Webhook / Kafka / WebSocket     │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 📂 项目结构
+
+```
+alpha-detector/
+├── cmd/                    # 程序入口
+│   └── alpha/             # 主程序
+├── internal/              # 私有应用代码
+│   ├── domain/            # 领域核心层
+│   │   ├── entity/        # 实体
+│   │   ├── valueobject/   # 值对象
+│   │   └── service/       # 领域服务接口
+│   ├── application/       # 应用层
+│   │   ├── scorer/        # CAMP-I评分器
+│   │   ├── risk/          # 风控
+│   │   └── pipeline/      # 管道编排
+│   ├── infrastructure/    # 基础设施层
+│   │   └── gateway/       # 外部服务网关
+│   ├── interfaces/        # 接口层
+│   │   ├── cli/           # CLI接口
+│   │   └── sink/          # 信号输出
+│   └── config/            # 配置管理
+├── pkg/                   # 可复用公共库
+│   ├── ratelimit/         # 限流
+│   ├── circuitbreaker/    # 熔断器
+│   ├── errors/            # 错误定义
+│   └── util/              # 工具函数
+├── configs/               # 配置文件
+├── test/                  # 测试
+├── docs/                  # 文档
+├── Makefile              
+├── Dockerfile
+├── docker-compose.yaml
+└── README.md
+```
+
+## 🚀 快速开始
+
+### 前置要求
+
+- Go 1.21+
+- Git
+
+### 安装
+
+```bash
+# 克隆仓库
+git clone https://github.com/bingaigc/gp.git
+cd gp
+
+# 下载依赖
+go mod download
+
+# 构建
+make build
+```
+
+### 配置
+
+1. 复制配置文件模板：
+```bash
+cp configs/config.yaml configs/config.local.yaml
+```
+
+2. 编辑配置文件，设置Kimi API Key：
+```yaml
+ai:
+  api_key: "your-kimi-api-key"
+```
+
+或者通过环境变量：
+```bash
+export ALPHA_KIMI_API_KEY="your-kimi-api-key"
+```
+
+### 运行
+
+#### 查看版本和系统信息
+
+```bash
+./bin/alpha-detector version
+```
+
+#### 健康检查
+
+```bash
+# 检查配置、数据源和AI服务状态
+./bin/alpha-detector health
+```
+
+#### 演示模式（使用示例数据）
+
+```bash
+# 使用 make
+make run
+
+# 或直接运行
+./bin/alpha-detector scan
+```
+
+#### 实时模式（使用真实数据 + AI分析）
+
+```bash
+# 需要设置Kimi API Key
+export ALPHA_KIMI_API_KEY="your-api-key"
+
+# 运行实时扫描
+./bin/alpha-detector scan-real
+
+# 查看帮助
+./bin/alpha-detector scan-real --help
+```
+
+#### 所有可用命令
+
+```bash
+# 查看所有命令
+./bin/alpha-detector --help
+
+# 可用命令：
+#   scan       - 演示模式（使用示例数据）
+#   scan-real  - 实时模式（真实数据 + AI分析）
+#   version    - 显示版本信息
+#   health     - 系统健康检查
+#   help       - 帮助信息
+```
+
+**注意**: 实时模式会连接东方财富API获取实时市场数据，并调用Kimi AI进行分析，会产生API费用。
+
+## 📊 CAMP-I 五维度模型
+
+### 1. Capital Flow (资金面) - 权重30%
+
+核心逻辑：资金是股价的第一推动力
+
+评分标准：
+- 100分：主力连续3日以上流入，累计>1亿，超大单占比>60%
+- 80分：主力流入>5000万，持续2日以上
+- 60分：主力流入>2000万
+- 0分：主力净流出
+
+红线：涨幅>3% 但主力净流出>1000万 → 诱多陷阱，直接AVOID
+
+### 2. Action (技术面) - 权重25%
+
+核心逻辑：量价时空关系决定趋势
+
+评分标准：
+- 100分：放量上涨 + 换手率8% + 突破20日线 + 多头排列
+- 80分：温和放量 + 换手率5-10% + 在均线上方
+- 60分：缩量回调但在支撑位
+- 0分：放量下跌 or 换手率>25%（投机过度）
+
+### 3. Margin (估值面) - 权重20%
+
+核心逻辑：安全边际与估值保护
+
+评分标准：
+- 100分：PE 10-30 + 市值>100亿 + 股价>10元
+- 80分：PE 30-50 + 市值>50亿 + 股价>5元
+- 60分：PE 50-80 + 市值>10亿
+- 0分：PE<0 (亏损) or 市值<50亿 + 股价<3元
+
+### 4. Plate (板块轮动) - 权重15%
+
+核心逻辑：顺势而为，跟随热点
+
+评分标准：
+- 100分：板块排名前3 + 板块资金流入>20亿 + 龙头股
+- 80分：板块排名前10 + 板块资金流入>10亿
+- 50分：板块排名前30
+- 10分：板块排名靠后 or 资金流出
+
+### 5. Institution (机构行为) - 权重10%
+
+核心逻辑：跟随聪明钱
+
+评分标准：
+- 100分：3家以上机构买入，无机构卖出 + 北向资金流入
+- 80分：机构净买入>2000万
+- 50分：有机构参与
+- 0分：机构卖出 or 游资互割
+
+## 🛡️ 风控系统
+
+### 多层风控体系
+
+1. **信号级风控**
+   - 最低置信度60%
+   - 一票否决条件（诱多陷阱、低价股等）
+   - 信号降级（大盘环境恶劣）
+
+2. **仓位级风控**
+   - 单股最大仓位15%
+   - 单板块最大30%
+   - 总仓位最大85%
+
+3. **账户级风控**
+   - 日最大亏损5万或5%
+   - 周最大亏损率10%
+   - 月最大亏损率20%
+   - 最大连续亏损3次
+
+4. **止损止盈**
+   - 固定止损3-8%
+   - 移动止损（盈利10%启动）
+   - 时间止损（最长持有30天）
+
+## 📈 使用示例
+
+### 快速开始
+
+```bash
+# 1. 查看版本
+./bin/alpha-detector version
+
+# 2. 健康检查
+./bin/alpha-detector health
+
+# 3. 运行演示
+./bin/alpha-detector scan
+```
+
+### 配置文件
+
+系统提供了详细的配置示例：
+
+```bash
+# 查看配置示例
+cat configs/config.example.yaml
+
+# 复制并编辑配置
+cp configs/config.example.yaml configs/config.local.yaml
+vim configs/config.local.yaml
+```
+
+**主要配置项：**
+
+```yaml
+# 数据源
+data_source:
+  primary: "eastmoney"
+  timeout: 10s
+
+# AI配置
+ai:
+  provider: "kimi"
+  model: "moonshot-v1-8k"
+  api_key: ""  # 从环境变量读取
+
+# 风控
+risk:
+  daily_max_loss: 50000.0
+  max_signals_per_day: 20
+
+# Pipeline
+pipeline:
+  workers: 3
+  limit: 100
+
+# 信号输出
+sinks:
+  console:
+    enabled: true
+  json_file:
+    enabled: false
+    output_dir: "output/signals"
+  webhook:
+    enabled: false
+    url: ""
+    format: "dingtalk"
+
+# 过滤器
+filters:
+  enable_basic: true
+  enable_liquidity: true
+  min_volume: 100000
+  min_amount: 10000000.0
+  whitelist: []
+  blacklist: []
+```
+
+### 扫描市场
+
+```bash
+./bin/alpha-detector scan
+```
+
+输出示例：
+
+```
+╔═══════════════════════════════════════════════════════════╗
+║   CAMP-I Distributed Alpha Signal Detector v1.0.0        ║
+║   企业级分布式Alpha信号探测系统                              ║
+╚═══════════════════════════════════════════════════════════╝
+
+📋 配置: CAMP-I Alpha Detector (development)
+🔧 数据源: eastmoney
+🤖 AI模型: kimi (moonshot-v1-8k)
+⚙️  并发数: 3 workers
+
+🚀 开始扫描市场...
+
+═══════════════════════════════════════════════════════════
+📊 宁德时代 (300750) - SZ
+═══════════════════════════════════════════════════════════
+
+🎯 信号类型: 🚀🚀🚀 STRONG_BUY
+📈 综合评分: 87/100
+🎲 置信度: 87.00%
+
+📊 因子评分:
+  • 资金面 (权重30%): 80/100 - 主力连续流入>5000万
+  • 技术面 (权重25%): 100/100 - 放量上涨，换手率健康
+  • 估值面 (权重20%): 80/100 - PE合理，大盘股
+  • 板块轮动 (权重15%): 100/100 - 龙头板块，资金净流入>20亿
+  • 机构行为 (权重10%): 100/100 - 3家以上机构买入，无机构卖出
+
+💰 价格目标:
+  当前价格: 185.20
+  支撑位: 175.94
+  压力位: 203.72
+  止损价: 179.64
+  止盈价: 200.02
+
+⚠️  风险等级: 🟢 LOW (评分: 13/100)
+
+📋 仓位建议:
+  操作: BUY
+  建议仓位: 10.0%
+  入场价格: 183.35-187.05
+  止损比例: 3.0%
+  止盈比例: 8.0%
+  持有周期: 5-10天
+  建议理由: 强买入信号，建议10%仓位
+
+═══════════════════════════════════════════════════════════
+
+✅ 扫描完成！生成信号数: 2
+```
+
+## 🔧 开发指南
+
+### 代码规范
+
+- 遵循Clean Architecture设计原则
+- 使用DDD(领域驱动设计)分层
+- 错误处理使用wrap模式
+- 所有公开函数必须有注释
+
+### 测试
+
+```bash
+# 运行所有测试
+make test
+
+# 运行单元测试
+make test-unit
+
+# 查看覆盖率
+make test-coverage
+```
+
+### 构建
+
+```bash
+# 本地构建
+make build
+
+# Docker构建
+make docker-build
+
+# 运行Docker Compose
+make docker-run
+```
+
+## 📖 文档
+
+- [架构设计](docs/architecture.md)
+- [API文档](docs/api.md)
+- [策略说明](docs/strategy_guide.md)
+- [运维手册](docs/runbook.md)
+
+## 🤝 贡献
+
+欢迎提交Issue和Pull Request！
+
+## 📄 License
+
+MIT License
+
+## 🙏 致谢
+
+- Kimi AI - 提供智能分析能力
+- 东方财富 - 提供市场数据
+
+## 📞 联系方式
+
+- Issue: https://github.com/bingaigc/gp/issues
+- Email: your-email@example.com
+
+---
+
+**免责声明**: 本系统仅供学习研究使用，不构成任何投资建议。投资有风险，入市需谨慎。
