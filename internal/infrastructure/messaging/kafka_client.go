@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/bingaigc/gp/internal/domain/entity"
-	"github.com/bingaigc/gp/pkg/errors"
 )
 
 // EventType represents the type of event
@@ -59,19 +58,19 @@ func (k *KafkaClient) Connect(ctx context.Context) error {
 // Publish sends an event to Kafka
 func (k *KafkaClient) Publish(ctx context.Context, event *Event) error {
 	if !k.connected {
-		return errors.New(errors.ErrInfrastructure, "Kafka not connected")
+		return fmt.Errorf("kafka not connected")
 	}
 
 	// Validate event
 	if event.ID == "" || event.Type == "" {
-		return errors.New(errors.ErrValidation, "Invalid event: missing ID or Type")
+		return fmt.Errorf("invalid event: missing ID or Type")
 	}
 
 	// In production, this would publish to Kafka
 	// For now, we log the event
 	data, err := json.Marshal(event)
 	if err != nil {
-		return errors.Wrap(err, errors.ErrInfrastructure, "Failed to marshal event")
+		return fmt.Errorf("failed to marshal event: %w", err)
 	}
 
 	// Simulate Kafka publish
@@ -82,7 +81,7 @@ func (k *KafkaClient) Publish(ctx context.Context, event *Event) error {
 // Subscribe listens for events from Kafka
 func (k *KafkaClient) Subscribe(ctx context.Context, eventTypes []EventType, handler func(*Event) error) error {
 	if !k.connected {
-		return errors.New(errors.ErrInfrastructure, "Kafka not connected")
+		return fmt.Errorf("kafka not connected")
 	}
 
 	// In production, this would subscribe to Kafka topics
@@ -104,10 +103,10 @@ func SignalEvent(signal *entity.Signal, eventType EventType) *Event {
 		Timestamp: time.Now(),
 		Source:    "alpha-detector",
 		Data: map[string]interface{}{
-			"stock_code":  signal.Stock.Code,
-			"stock_name":  signal.Stock.Name,
-			"signal_type": signal.Type.String(),
-			"score":       signal.Score,
+			"stock_code":  signal.StockCode,
+			"stock_name":  signal.StockName,
+			"signal_type": string(signal.SignalType),
+			"score":       signal.TotalScore,
 			"confidence":  signal.Confidence,
 		},
 	}

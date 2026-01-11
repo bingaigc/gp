@@ -2,7 +2,7 @@ package risk
 
 import (
 	"context"
-	"math"
+	"fmt"
 	"sort"
 	"time"
 
@@ -190,7 +190,7 @@ func (d *DynamicRiskController) ShouldReducePositions(ctx context.Context) (bool
 
 // CalculateMaxPositionSize calculates maximum position size based on VaR
 func (d *DynamicRiskController) CalculateMaxPositionSize(ctx context.Context, stockVolatility float64) (float64, error) {
-	varResult, err := d.varEngine.CalculateVaR(ctx)
+	_, err := d.varEngine.CalculateVaR(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -220,7 +220,7 @@ func (d *DynamicRiskController) CalculateMaxPositionSize(ctx context.Context, st
 func (d *DynamicRiskController) PortfolioStressTest(ctx context.Context, scenarios []float64) map[string]float64 {
 	results := make(map[string]float64)
 	
-	for i, shock := range scenarios {
+	for _, shock := range scenarios {
 		scenarioName := ""
 		if shock < 0 {
 			scenarioName = fmt.Sprintf("Market_Down_%.0f%%", -shock*100)

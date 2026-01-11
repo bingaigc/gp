@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"math"
 	"time"
-
-	"github.com/bingaigc/gp/pkg/errors"
 )
 
 // AlgoType represents the type of algorithm
@@ -275,7 +273,7 @@ func (s *SmartOrderRouter) RouteOrder(ctx context.Context, order *Order) (string
 
 	// For now, simple round-robin
 	if len(s.venues) == 0 {
-		return "", errors.New(errors.ErrValidation, "No venues available")
+		return "", fmt.Errorf("no venues available")
 	}
 
 	// Return first venue (in production, use sophisticated routing logic)
